@@ -1,3 +1,5 @@
+import os
+
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -37,7 +39,17 @@ class ExtendedUser(AbstractUser):
 
 class UserProfile(models.Model):
 
-    profile_pic = models.ImageField(upload_to='profile_picture', blank=True)
+    profile_picture = models.ImageField(upload_to='profile_picture', blank=True)
+    # profile_picture = ImageCropField(upload_to='profile_picture', blank=True)
+    # cropping = ImageRatioField('profile_picture', '500x500')
+    # cropping.verbose_name = ''
+
+    @property
+    def displayable_propic(self):
+        if self.profile_picture:
+            return self.profile_picture.url
+        else:
+            return settings.STATIC_URL+settings.DEFAULT_USER_IMG
 
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
@@ -48,8 +60,24 @@ class UserProfile(models.Model):
         related_name='profile'
     )
 
+    class Meta:
+        verbose_name = 'user profile'
+        verbose_name_plural = 'user profiles'
+
     def __str__(self):
         return f'Profile of {self.first_name} {self.last_name}'
+
+    def save(self, *args, **kwargs):
+        try:
+            old_instance = UserProfile.objects.get(id=self.id)
+            if old_instance.profile_picture != self.profile_picture and old_instance.profile_picture.name != "":
+                os.remove(settings.MEDIA_ROOT+'/'+old_instance.profile_picture.name)
+        except UserProfile.DoesNotExist:
+            pass
+
+        return super(UserProfile, self).save(*args, **kwargs)
+
+
 
 
 

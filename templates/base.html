@@ -23,6 +23,10 @@
         {% endblock %}
     </style>
 
+    {% block head %}
+
+    {% endblock %}
+
     <title>{% block title %}{% endblock %}</title>
 </head>
 <body>
@@ -74,18 +78,43 @@
                             {{ user.username|truncatechars:25 }}
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="#">Action</a>
+                            {% if user.has_profile %}
+                                <a class="dropdown-item" href="{% url 'user_profile:own-user-profile-detail' %}">
+                                    <i class="fas fa-user ml-n3 mr-1"></i> Profile
+                                </a>
+                                <a class="dropdown-item" href="{% url 'user_profile:user-profile-edit' user.profile.id %}">
+                                    <i class="fas fa-user-edit ml-n3 mr-1"></i>Edit Profile
+                                </a>
+                            {% else %}
+                                <a class="dropdown-item" href="{% url 'user_profile:user-profile-create'%}">
+                                    <i class="fas fa-user-edit ml-n3 mr-1"></i>Create Profile
+                                </a>
+                            {% endif %}
                         </div>
                     </li>
                 </ul>
                 <div class="navbar-brand my-n1">
-                    <img class="rounded-circle ml-md-3" src="{% static 'img/kea.jpg' %}"
-                         alt="profilepic"
-                         height="40px" width="40px">
+                    {% if user.has_profile %}
+                        <a href="{% url 'user_profile:own-user-profile-detail' %}">
+                            <img class="rounded-circle ml-md-3"
+                                 src= "{{ user.profile.displayable_propic }}"
+                                 alt="profilepic"
+                                 height="40px" width="40px">
+                        </a>
+                    {% else %}
+                        <a href="{% url 'user_profile:user-profile-create' %}">
+                            <img class="rounded-circle ml-md-3"
+                                 src="{% static 'img/default_user.jpg' %}"
+                                 alt="profilepic"
+                                 height="40px" width="40px">
+                        </a>
+                    {% endif %}
+
                 </div>
                 <a class="btn btn-outline-danger" href="{% url 'logout' %}">Logout</a>
             {% else %}
-                <a class="btn btn-outline-warning" href="{% url 'login' %}">Login</a>
+                <a class="btn btn-outline-warning mr-md-3" href="{% url 'login' %}">Login</a>
+                <a class="btn btn-warning" href="{% url 'user_profile:user-registration' %}">Register</a>
             {% endif %}
         {#    FINE ZONA LOGIN/LOGOUT E DATI UTENTE    #}
 

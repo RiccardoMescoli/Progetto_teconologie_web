@@ -1,0 +1,10 @@
+{% extends 'base.html' %}#
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Profile creation{% endblock %}
+
+{% block content %}
+    <h1>Profile creation</h1>
+    {% crispy form %}
+{% endblock %}

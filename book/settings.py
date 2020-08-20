@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+from easy_thumbnails.conf import Settings as thumbnail_settings
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 
@@ -121,7 +122,19 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
+'''
+THUMBNAIL_PROCESSORS = (
+    'image_cropping.thumbnail_processors.crop_corners',
+) + thumbnail_settings.THUMBNAIL_PROCESSORS
+'''
+
 STATIC_URL = '/static/'
+
+DEFAULT_USER_IMG = 'img/default_user.jpg'
+
+MEDIA_URL = '/media/'
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'user_profile/media')
 
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
@@ -130,6 +143,8 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 AUTH_USER_MODEL = 'user_profile.ExtendedUser'
 
 LOGIN_URL = '/user/login'
+
+PROFILE_CREATION_URL = '/user_profile/create'
 
 LOGIN_REDIRECT_URL = 'homepage'
 
