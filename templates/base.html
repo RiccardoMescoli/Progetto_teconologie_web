@@ -18,11 +18,6 @@
     <link rel="stylesheet"
           href="{% static 'css/style.css' %}">
 
-    <style>
-        {% block style %}
-        {% endblock %}
-    </style>
-
     {% block head %}
 
     {% endblock %}
@@ -113,8 +108,8 @@
                 </div>
                 <a class="btn btn-outline-danger" href="{% url 'logout' %}">Logout</a>
             {% else %}
-                <a class="btn btn-outline-warning mr-md-3" href="{% url 'login' %}">Login</a>
-                <a class="btn btn-warning" href="{% url 'user_profile:user-registration' %}">Register</a>
+                <a id="nav_login" class="btn btn-outline-warning mr-3" href="{% url 'login' %}">Login</a>
+                <a id="nav_register" class="btn btn-warning" href="{% url 'user_profile:user-registration' %}">Register</a>
             {% endif %}
         {#    FINE ZONA LOGIN/LOGOUT E DATI UTENTE    #}
 
