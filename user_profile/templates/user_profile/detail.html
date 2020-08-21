@@ -10,12 +10,12 @@
     <div class="container-fluid justify-content-start">
         <div class="row">
             <div class="col-md-3 col-12">
-                <div class="card" style="width: 250px">
+                <div class="card" id="user_card" style="width: 250px">
                     <div class="card-header">
                         {% if object.user.username %}
                              <span style="font-weight: bold">{{ object.user.username }}</span>
                         {% else %}
-                            <span style="font-weight: bold">Profile Card</span>
+                            <span style="font-weight: bold">User info</span>
                         {% endif %}
                         {% if object.user.is_superuser %}
                             <br>
@@ -35,7 +35,7 @@
                             {{ object.first_name }} {{ object.last_name}}
                         </p>
 
-                        {% if user.id == object.user.id %}
+                        {% if user.id == object.user.id or user.is_superuser %}
                             <a href="{% url 'user_profile:user-profile-edit' object.id %}" class="btn btn-warning">
                                 <i class="fas fa-user-edit mr-1"></i>Edit Profile
                             </a>
@@ -51,4 +51,9 @@
             </div>
         </div>
     </div>
+    <style>
+         @media(min-width: 768px){
+     #user_card{margin-top: 0.5cm}
+     }
+    </style>
 {% endblock %}

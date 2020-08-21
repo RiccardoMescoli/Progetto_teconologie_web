@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'crispy_forms',
     'user_profile.apps.UserProfileConfig',
+    'book_functionalities.apps.BookFunctionalitiesConfig',
 ]
 
 MIDDLEWARE = [
@@ -132,13 +133,17 @@ STATIC_URL = '/static/'
 
 DEFAULT_USER_IMG = 'img/default_user.jpg'
 
+DEFAULT_BOOK_IMG = 'img/default_book.png'
+
 MEDIA_URL = '/media/'
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'user_profile/media')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+DATE_INPUT_FORMATS = ['%d-%m-%Y']
 
 AUTH_USER_MODEL = 'user_profile.ExtendedUser'
 

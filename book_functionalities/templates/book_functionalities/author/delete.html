@@ -1,0 +1,56 @@
+{% extends 'book_functionalities/detail_base.html' %}#
+{% load static %}
+
+{% block title %}
+    Delete Author
+{% endblock %}
+
+{% block page_h1 %}
+    <span style="color: red">Are you sure?</span>
+{% endblock %}
+
+{% block card_header %}
+    <span style="font-weight: bold">Author info</span>
+{% endblock %}
+{% block card_body %}
+    <img class="card-img-top img-thumbnail img-fluid mh-100" src="{{object.displayable_portrait}}"
+         alt="profile picture">
+{% endblock %}
+{% block card_footer %}
+    <p><span style="font-weight: bold">
+        Full Name:</span><br>
+        {{ object.full_name }}
+        <br>
+        <span style="font-weight: bold">
+        Birth date:</span><br>
+        {{ object.birth_date|date:"d/m/Y" }}
+    </p>
+
+{% endblock %}
+{% block page_body %}
+
+    <dl id="page_body_list">
+      <dt class="col-sm-3">Biography:</dt>
+      <dd class="col-sm-12">{{ object.biography }}</dd>
+    </dl>
+    <div class="mt-5">
+        <form method="post">{% csrf_token %}
+            <input class="btn btn-danger mr-2" type="submit" value="Delete">
+            <a class="btn btn-secondary"
+               href="{% url 'book_functionalities:author-detail' object.id %}">
+                Cancel
+            </a>
+        </form>
+    </div>
+
+    <style>
+        @media(min-width: 768px){
+            #page_body_list{margin-top: 0.75cm}
+         }
+        @media(max-width: 768px){
+            #page_body_list{margin-top: 0.5cm}
+        }
+    </style>
+
+{% endblock %}
+

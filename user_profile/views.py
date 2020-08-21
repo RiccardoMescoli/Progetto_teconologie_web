@@ -1,14 +1,12 @@
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 
-# Create your views here.
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic import CreateView, DetailView, UpdateView
 
-from user_profile.decorators import profile_required
+from user_profile.decorators import no_profile, profile_required
 from user_profile.forms import ExtendedUserCreationForm, UserProfileCreateForm, UserProfileEditForm
-from user_profile.models import ExtendedUser, UserProfile
+from user_profile.models import UserProfile
 
 
 class UserCreateView(CreateView):
@@ -17,7 +15,7 @@ class UserCreateView(CreateView):
     success_url = reverse_lazy('homepage')
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(no_profile, name='dispatch')
 class UserProfileCreateView(CreateView):
     form_class = UserProfileCreateForm
     model = UserProfile
@@ -52,14 +50,15 @@ class UserProfileEditView(UpdateView):
 
     def form_valid(self, form):
         if 'cancel' in self.request.POST:
-            return redirect(self.get_success_url())
+            return redirect(reverse_lazy('user_profile:user-profile-detail', args=(self.kwargs.get('pk'),)))
+
         return super(UserProfileEditView, self).form_valid(form)
 
     def dispatch(self, request, *args, **kwargs):
-        if request.user.profile.id == kwargs['pk']:
+        if request.user.profile.id == kwargs['pk'] or request.user.is_superuser:
             return super().dispatch(request, *args, **kwargs)
         else:
-            return reverse('user_profile:own-user-profile-detail')
+            return redirect(reverse('user_profile:own-user-profile-detail'))
 
 
 
