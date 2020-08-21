@@ -31,6 +31,7 @@ class AuthorEditView(UpdateView):
         return super(AuthorEditView, self).form_valid(form)
 
 
+@method_decorator(moderators_only, name='dispatch')
 class AuthorDeleteView(DeleteView):
     model = Author
     template_name = 'book_functionalities/author/delete.html'
