@@ -1,0 +1,26 @@
+{% extends 'base.html' %}#
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Book creation{% endblock %}
+
+{% block content %}
+    <h1>Book creation</h1>
+    <label for="id_author" class=" requiredField">
+                Author<span class="asteriskField">*</span> </label>
+    <input class="form-control" id="author_filter" type="text" placeholder="Type to filter Authors..">
+    {% crispy form %}
+{% endblock %}
+
+{% block javascript %}
+    <script>
+        $(document).ready(function(){
+            $("#author_filter").on("keyup", function() {
+                let value = $(this).val().toLowerCase();
+                $("#id_author *").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+              });
+        });
+    </script>
+{% endblock %}

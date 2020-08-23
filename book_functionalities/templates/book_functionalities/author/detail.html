@@ -7,14 +7,14 @@
 
 {% block page_h1 %}
     Author page
-{% endblock %}o %}
+{% endblock %}
 
 {% block card_header %}
     <span style="font-weight: bold">Author info</span>
 {% endblock %}
 {% block card_body %}
     <img class="card-img-top img-thumbnail img-fluid mh-100" src="{{object.displayable_portrait}}"
-         alt="profile picture">
+         alt="Author portrait" style="height: 250px; width: 250px">
 {% endblock %}
 {% block card_footer %}
     <p><span style="font-weight: bold">
@@ -25,7 +25,8 @@
         Birth date:</span><br>
         {{ object.birth_date|date:"d/m/Y" }}
     </p>
-
+{% endblock %}
+{% block card_footer_buttons %}
     {% if user.is_moderator %}
         <a href="{% url 'book_functionalities:author-edit' object.id %}" class="btn btn-warning">
             <i class="fas fa-user-edit mr-1"></i>Edit Author
@@ -38,8 +39,8 @@
 {% block page_body %}
 
     <dl id="page_body_list">
-      <dt class="col-sm-3">Biography:</dt>
-      <dd class="col-sm-12">{{ object.biography }}</dd>
+        <dt class="col-sm-3">Biography:</dt>
+        <dd class="col-sm-12">{{ object.biography }}</dd>
     </dl>
 
     <style>

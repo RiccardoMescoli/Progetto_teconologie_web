@@ -43,11 +43,84 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 col-12">
+{#      REVIEWS SECTION      #}
+            <div class="col-md-9 col-12">
+                <article class="mt-5 mt-md-0">
+                    <a href="{% url 'book_functionalities:book-review-create' %}" class="btn btn-primary float-right mb-2">
+                        Create
+                    </a>
+                    <h5>Reviews</h5>
+                </article>
 
-            </div>
-            <div class="col-md-3 col-12">
 
+
+                <div class="container rounded border" style="height: 80%; overflow-y: scroll">
+                    {% for review in object.reviews %}
+{#           REVIEW CARD             #}
+                        <div class="card my-3" style="overflow-wrap: break-word">
+                            <div class="card-header align-content-center" style="overflow-wrap: break-word">
+                                <div class="row">
+                                    <div class="col-10 justify-content-start">
+                                        <article>
+                                            Review of:
+                                            <a href="{% url 'book_functionalities:book-detail' review.book.id %}">
+                                                {{ review.book.title }}
+                                            </a>
+                                        </article>
+                                    </div>
+
+                                   <div class="col-2 justify-content-start">
+                                       <article>
+                                           {{ review.rating }}<i class="fas fa-star" style="color: gold"></i>
+                                       </article>
+                                   </div>
+
+                                </div>
+                            </div>
+                            <div class="card-body row">
+                                <div class="col-md-2 col-3 border-right">
+                                    <a href="{% url 'book_functionalities:book-detail' review.book.id %}">
+                                        <img src="{{ review.book.displayable_cover }}" class="img-fluid mh-100" alt="book-cover">
+                                    </a>
+                                </div>
+                                <div class="col-md-10 col-9">
+                                    <p>
+                                        {{ review.content }}
+                                    </p>
+                                </div>
+                            </div>
+                                <div class="card-footer">
+                                    {% if user.id == object.user.id or user.is_superuser or user.is_moderator and not object.user.is_superuser %}
+                                    <article class="float-right">
+                                        {% if review.spoiler %}
+                                                <a href="#" class="btn mr-2"
+                                                   style="background-color: #533988 !important;">
+                                                    <span style="color: white">Spoiler</span>
+                                                </a>
+                                        {% endif %}
+                                        <a href="{% url 'book_functionalities:book-review-edit' review.id %}" class="btn btn-warning mr-2">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'book_functionalities:book-review-delete' review.id %}" class="btn btn-danger">
+                                            <i class="fas fa-eraser"></i>
+                                        </a>
+                                    </article>
+                                    {% else %}
+                                        <article class="float-right">
+                                            {% if review.spoiler %}
+                                                <a href="#" class="btn mr-2"
+                                                   style="background-color: #533988 !important;">
+                                                    <span style="color: white">Spoiler</span>
+                                                </a>
+                                            {% endif %}
+                                            <a href="#" class="btn btn-danger"><i class="far fa-flag"></i></a>
+                                        </article>
+                                    {% endif %}
+                                </div>
+                            </div>
+{#            FINE REVIEW CARD            #}
+                    {% endfor %}
+                </div>
             </div>
         </div>
     </div>

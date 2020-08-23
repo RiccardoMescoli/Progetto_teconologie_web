@@ -1,0 +1,75 @@
+{% extends 'book_functionalities/detail_base.html' %}#
+{% load static %}
+
+{% block title %}
+    Book page
+{% endblock %}
+
+{% block page_h1 %}
+    Book page
+{% endblock %}
+
+{% block card_header %}
+    <span style="font-weight: bold">Book info</span>
+{% endblock %}
+{% block card_body %}
+    <img class="card-img-top img-thumbnail mh-100" src="{{object.displayable_cover}}"
+         alt="book cover" style="width: 150px; margin-inline: 27px ">
+
+{% endblock %}
+{% block card_footer %}
+    <p><span style="font-weight: bold">
+        Title:</span><br>
+        {{ object.title }}
+        <br>
+        <span style="font-weight: bold">
+        Author:</span><br>
+        <a href="{% url 'book_functionalities:author-detail' object.author.id %}">{{ object.author.full_name }}</a>
+        <br>
+        <span style="font-weight: bold">
+        Rating:</span><br>
+        {% if object.avg_rating != None %}
+            {{ object.avg_rating }}<i class="fas fa-star" style="color: gold"></i>
+            ({{ object.ratings_qty }})
+        {% else %}
+            Not rated
+        {% endif %}
+        <br>
+        <span style="font-weight: bold">
+        Release date:</span><br>
+        {{ object.release_date|date:"d/m/Y" }}
+    </p>
+{% endblock %}
+{% block card_footer_buttons %}
+    {% if user.is_moderator %}
+        <a href="{% url 'book_functionalities:book-edit' object.id %}" class="btn btn-warning">
+            <i class="fas fa-edit mr-1"></i>Edit Book
+        </a>
+        <a href="{% url 'book_functionalities:book-delete' object.id %}" class="btn btn-danger mt-2">
+            <i class="fas fa-eraser mr-1"></i>Delete Book
+        </a>
+    {% endif %}
+{% endblock %}
+{% block page_body %}
+
+    <dl id="page_body_list">
+        <dt class="col-sm-3">Synopsis:</dt>
+        <dd class="col-sm-12">{{ object.synopsis }}</dd>
+        <dt class="col-sm-3">Genres:</dt>
+        <dd class="col-sm-12">
+            {{ book.genre_name_list|join:', ' }}
+        </dd>
+    </dl>
+
+    <style>
+        @media(min-width: 768px){
+            #page_body_list{margin-top: 0.75cm}
+         }
+        @media(max-width: 768px){
+            #page_body_list{margin-top: 0.5cm}
+        }
+    </style>
+
+{% endblock %}
+
+

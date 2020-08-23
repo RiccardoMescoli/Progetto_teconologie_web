@@ -6,6 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from django.db import models
 
 from book import settings
+from book_functionalities.models import BookReview
 
 
 class ExtendedUser(AbstractUser):
@@ -51,6 +52,10 @@ class UserProfile(models.Model):
         else:
             return settings.STATIC_URL+settings.DEFAULT_USER_IMG
 
+    @property
+    def reviews(self):
+        return BookReview.objects.filter(user_profile=self)
+
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
 
@@ -77,6 +82,11 @@ class UserProfile(models.Model):
 
         return super(UserProfile, self).save(*args, **kwargs)
 
+    def delete(self, using=None, keep_parents=False):
+        profile_pic_path = settings.MEDIA_ROOT + '/' + self.profile_picture.name
+        res = super(UserProfile, self).delete(using, keep_parents)
+        os.remove(profile_pic_path)
+        return res
 
 
 

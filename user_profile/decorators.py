@@ -27,3 +27,4 @@ def moderators_only(view_func):
         login_url=settings.LOGIN_URL
     )
     return login_required(user_is_moderator(view_func))
+

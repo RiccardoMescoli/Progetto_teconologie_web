@@ -1,5 +1,5 @@
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit
+from crispy_forms.layout import Button, Submit
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 
@@ -52,9 +52,9 @@ class UserProfileEditForm(forms.ModelForm):
     helper.form_id = 'user-profile-edit-form'
     helper.form_method = 'POST'
     helper.add_input(Submit('submit', 'Save'))
-    helper.add_input(
-        Submit('cancel', 'Cancel', css_class='btn btn-danger ml-md-2')
-    )
+    helper.add_input(Button('back', 'Cancel',
+                            css_class='btn-secondary ml-3',
+                            onClick="javascript:history.go(-1);"))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

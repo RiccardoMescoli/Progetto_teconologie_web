@@ -133,7 +133,7 @@ STATIC_URL = '/static/'
 
 DEFAULT_USER_IMG = 'img/default_user.jpg'
 
-DEFAULT_BOOK_IMG = 'img/default_book.png'
+DEFAULT_COVER_IMG = 'img/default_book.png'
 
 MEDIA_URL = '/media/'
 
@@ -146,6 +146,8 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 DATE_INPUT_FORMATS = ['%d-%m-%Y']
 
 AUTH_USER_MODEL = 'user_profile.ExtendedUser'
+
+PROFILE_MODEL = 'user_profile.UserProfile'
 
 LOGIN_URL = '/user/login'
 

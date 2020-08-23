@@ -66,6 +66,21 @@
             </ul>
 
         {#    ZONA LOGIN/LOGOUT E DATI UTENTE    #}
+
+            {% if user.is_moderator or user.is_superuser %}
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Actions
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="{% url 'book_functionalities:author-create' %}"><i class="fas fa-user-edit ml-n3 mr-1"></i>Author creation</a>
+                            <a class="dropdown-item" href="{% url 'book_functionalities:book-create' %}"><i class="fas fa-edit ml-n3 mr-1"></i>Book creation</a>
+                            <a class="dropdown-item" href="{% url 'book_functionalities:book-genre-list' %}"><i class="fas fa-list ml-n3 mr-1"></i>Book Genres list</a>
+                        </div>
+                    </li>
+                </ul>
+            {% endif %}
             {% if user.is_authenticated %}
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown">

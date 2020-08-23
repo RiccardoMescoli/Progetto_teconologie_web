@@ -1,0 +1,28 @@
+{% extends 'base.html' %}#
+{% load static %}
+{% load crispy_forms_tags %}
+
+
+{% block title %}Review creation{% endblock %}
+
+{% block content %}
+    <h1>Review creation</h1>
+    <label for="id_book" class=" requiredField">
+                Book<span class="asteriskField">*</span> </label>
+    <input class="form-control" id="book_filter" type="text" placeholder="Type to filter Books..">
+    {% crispy form %}
+
+{% endblock %}
+
+{% block javascript %}
+    <script>
+        $(document).ready(function(){
+            $("#book_filter").on("keyup", function() {
+                let value = $(this).val().toLowerCase();
+                $("#id_book *").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+              });
+        });
+    </script>
+{% endblock %}

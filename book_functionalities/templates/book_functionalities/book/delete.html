@@ -1,8 +1,8 @@
-{% extends 'book_functionalities/author/detail.html' %}#
+{% extends 'book_functionalities/book/detail.html' %}#
 {% load static %}
 
 {% block title %}
-    Delete Author
+    Delete Book
 {% endblock %}
 
 {% block page_h1 %}
@@ -10,11 +10,11 @@
 {% endblock %}
 
 {% block card_footer_buttons %}
-        <div class="mt-5">
+    <div class="mt-5">
         <form method="post">{% csrf_token %}
             <input class="btn btn-danger mr-2 mb-3" type="submit" value="Delete">
             <a class="btn btn-secondary mb-3"
-               href="{% url 'book_functionalities:author-detail' object.id %}">
+               href="{% url 'book_functionalities:book-detail' object.id %}">
                 Cancel
             </a>
         </form>

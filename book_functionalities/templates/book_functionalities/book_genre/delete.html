@@ -1,0 +1,23 @@
+{% extends 'base.html' %}#
+{% load static %}
+
+{% block title %}Delete Book Genre{% endblock %}
+
+{% block content %}
+
+    <h1><span style="color: red">Are you sure?</span></h1>
+    <p>
+        Are you sure you want to delete the <span class="font-italic font-weight-bold" style="color: red">
+            '{{ object.name }}'
+        </span> genre?
+    </p>
+
+    <form method="post">{% csrf_token %}
+        <input class="btn btn-danger mr-2 mt-2" type="submit" value="Delete">
+        <a class="btn btn-secondary mt-2"
+           href="{% url 'book_functionalities:book-genre-list' %}">
+            Cancel
+        </a>
+    </form>
+
+{% endblock %}

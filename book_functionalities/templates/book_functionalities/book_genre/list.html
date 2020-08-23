@@ -1,0 +1,35 @@
+{% extends 'base.html' %}#
+{% load static %}
+
+{% block title %}Book Genres{% endblock %}
+
+{% block content %}
+    <h1>Book Genres list</h1>
+    <table class="table table-bordered table-hover col-md-4">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+                {% for genre in object_list %}
+                    <tr>
+                        <td>{{ genre.name }}</td>
+                        <td>
+                            <a class="btn btn-warning mx-2 edit-button"
+                               href="{% url 'book_functionalities:book-genre-edit' genre.id %}">
+                                <i class='far fa-edit'></i>
+                            </a>
+                            <a class="btn btn-danger delete-button"
+                               href="{% url 'book_functionalities:book-genre-delete' genre.id %}">
+                                <i class='far fa-trash-alt'></i>
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+        </tbody>
+    </table>
+    <a class="btn btn-primary" href="{% url 'book_functionalities:book-genre-create' %}">Create</a>
+
+{% endblock %}

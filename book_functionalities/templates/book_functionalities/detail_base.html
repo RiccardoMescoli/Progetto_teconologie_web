@@ -11,6 +11,9 @@
                 {% block page_body %}
 
                 {% endblock %}
+                {% block page_body_buttons %}
+                
+                {% endblock %}
             </div>
 
             <div class="col-md-3 col-12 order-md-1 order-0">
@@ -20,7 +23,7 @@
 
                         {% endblock %}
                     </div>
-                    <div class="card-body" style="width: 250px; height: 250px">
+                    <div id="card_body_img" class="card-body" style="width: 250px; height: 250px">
                         {% block card_body %}
 
                         {% endblock %}
@@ -29,10 +32,15 @@
                         {% block card_footer %}
 
                         {% endblock %}
+                        {% block card_footer_buttons %}
+                        
+                        {% endblock %}
                     </div>
                 </div>
             </div>
             </div>
         </div>
     </div>
+
+
 {% endblock %}
