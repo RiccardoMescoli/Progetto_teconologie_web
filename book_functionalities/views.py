@@ -1,5 +1,8 @@
+from operator import attrgetter
+
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect
+from django.http import JsonResponse
+from django.shortcuts import redirect, render
 
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
@@ -7,13 +10,15 @@ from django.views.generic import CreateView, DeleteView, DetailView, ListView, U
 
 from book import settings
 from book_functionalities.forms import AuthorCreateForm, AuthorEditForm, BookCreateForm, BookEditForm, \
-    BookGenreCreateForm, BookGenreEditForm, BookReviewCreateForm, BookReviewEditForm
-from book_functionalities.models import Author, Book, BookGenre, BookReview
+    BookGenreCreateForm, BookGenreEditForm, BookRecommendationCreateForm, BookReviewCreateForm, BookReviewEditForm
+from book_functionalities.models import Author, Book, BookGenre, BookRecommendation, BookReview, ReviewReport
 
 from user_profile.decorators import moderators_only, profile_required
 
 
-# --------AUTHOR--------
+# ---------------- AUTHOR -----------------
+from user_profile.search import get_book_recommendation_queryset, get_book_review_queryset
+
 
 class AuthorDetailView(DetailView):
     model = Author
@@ -58,7 +63,7 @@ class AuthorCreateView(CreateView):
         return redirect(self.success_url)
 
 
-# --------BOOK--------
+# ---------------- BOOK ----------------
 
 class BookDetailView(DetailView):
     model = Book
@@ -100,7 +105,7 @@ class BookCreateView(CreateView):
         return redirect(self.success_url)
 
 
-# --------BOOK GENRE--------
+# -------------- BOOK GENRE -------------
 
 @method_decorator(moderators_only, name='dispatch')
 class BookGenreListView(ListView):
@@ -130,7 +135,8 @@ class BookGenreDeleteView(DeleteView):
     template_name = 'book_functionalities/book_genre/delete.html'
     success_url = reverse_lazy('book_functionalities:book-genre-list')
 
-# --------BOOK REVIEW--------
+
+# --------------- BOOK REVIEW ---------------
 
 
 @method_decorator(profile_required, name='dispatch')
@@ -190,3 +196,119 @@ class BookReviewDeleteView(DeleteView):
             return redirect(settings.LOGIN_URL)
         self.success_url = reverse_lazy('user_profile:user-profile-detail', args=(review.user_profile.id,))
         return super(BookReviewDeleteView, self).dispatch(request, args, kwargs)
+
+
+# ----------------- BOOK RECOMMENDATION -------------------
+
+@method_decorator(profile_required, name='dispatch')
+class BookRecommendationCreateView(CreateView):
+    form_class = BookRecommendationCreateForm
+    model = BookRecommendation
+    template_name = 'book_functionalities/book_recommendation/create.html'
+    success_url = reverse_lazy('user_profile:own-user-profile-detail')
+
+    def form_valid(self, form):
+        profile = self.request.user.profile
+
+        try:
+            if BookRecommendation.objects.get(
+                    user_profile=profile,
+                    base_book=form.cleaned_data.get('base_book', None),
+                    recommended_book=form.cleaned_data.get('recommended_book', None)
+            ):
+                form.add_error('recommended_book', 'You have already made this suggestion')
+                return super(BookRecommendationCreateView, self).form_invalid(form)
+        except BookRecommendation.DoesNotExist:
+            pass
+
+        instance, _ = BookRecommendation.objects.get_or_create(
+            user_profile=profile,
+            base_book=form.cleaned_data.get('base_book', None),
+            recommended_book=form.cleaned_data.get('recommended_book', None)
+        )
+        instance.save()
+        return redirect(self.success_url)
+
+
+@method_decorator(profile_required, name='dispatch')
+class BookRecommendationDeleteView(DeleteView):
+    form_class = BookRecommendationCreateForm
+    model = BookRecommendation
+    template_name = 'book_functionalities/book_recommendation/delete.html'
+    success_url = reverse_lazy('user_profile:own-user-profile-detail')
+
+
+# ------------ SEARCH PAGES ------------
+
+def book_review_search_view(request):
+
+    context = {}
+
+    if request.GET:
+        title = request.GET.get('title', '')
+        author = request.GET.get('author', '')
+        context['title_query'] = title
+        context['author_query'] = author
+
+        results_list = sorted(get_book_review_queryset(title, author), key=attrgetter('book.title'), reverse=False)
+        context['results_list'] = results_list
+
+    return render(request, 'book_functionalities/search_pages/book_review/search.html', context)
+
+
+def book_recommendation_search_view(request):
+
+    context = {}
+
+    if request.GET:
+        title = request.GET.get('title', '')
+        author = request.GET.get('author', '')
+        context['title_query'] = title
+        context['author_query'] = author
+
+        results_list = sorted(get_book_recommendation_queryset(title, author),
+                              key=attrgetter('base_book.title'),
+                              reverse=False
+                              )
+        context['results_list'] = results_list
+
+    return render(request, 'book_functionalities/search_pages/book_recommendation/search.html', context)
+
+
+# --------------- AJAX -----------------
+
+
+@login_required
+def ajax_report_review(request):
+    reported_by = request.user
+
+    try:
+        review = BookReview.objects.get(pk=request.GET.get('review', False))
+    except BookReview.DoesNotExist:
+        return JsonResponse(
+            {
+                'already_reported': False,
+                'is_success': False
+            }
+        )
+
+    try:
+        ReviewReport.objects.get(user=reported_by, review=review)
+        return JsonResponse(
+            {
+                'already_reported': True,
+                'is_success': False
+            }
+        )
+    except ReviewReport.DoesNotExist:
+        instance, _ = ReviewReport.objects.get_or_create(user=reported_by, review=review)
+        instance.save()
+
+        return JsonResponse(
+            {
+                'already_reported': False,
+                'is_success': True
+            }
+        )
+
+

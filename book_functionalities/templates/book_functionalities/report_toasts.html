@@ -1,0 +1,58 @@
+<style>
+    @media(min-width: 768px) {
+         .toast-hidden {
+             display: none;
+             bottom: 0;
+             right: 0;
+             min-width: 250px;
+             position: fixed;
+         }
+     }
+    @media(max-width: 768px) {
+        .toast-hidden {
+            min-width: 250px;
+            width: 100%;
+             display: none;
+            position: fixed;
+            top: 0;
+            right: 25px;
+         }
+    }
+</style>
+
+
+
+
+<div id="report_success" class="toast bg-success toast-hidden" role="alert" aria-live="polite" aria-atomic="true" data-delay="2000">
+        <div class="toast-header">
+            <span class="font-weight-bold">Success!</span>
+            <button type="button" class="ml-auto mb-1 close" data-dismiss="toast" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+      <div class="toast-body">
+        Reported!
+      </div>
+    </div>
+    <div id="already_reported" class="toast bg-warning toast-hidden" role="alert" aria-live="polite" aria-atomic="true" data-delay="2000">
+        <div class="toast-header">
+            <span class="font-weight-bold">Warning!</span>
+            <button type="button" class="ml-auto mb-1 close" data-dismiss="toast" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+      <div class="toast-body">
+        You have already reported this review
+      </div>
+    </div>
+    <div id="report_failed" class="toast bg-danger toast-hidden" role="alert" aria-live="polite" aria-atomic="true" data-delay="2000">
+        <div class="toast-header">
+            <span class="font-weight-bold">Error!</span>
+            <button type="button" class="ml-auto mb-1 close" data-dismiss="toast" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+      <div class="toast-body">
+        Report failed!
+      </div>
+    </div>

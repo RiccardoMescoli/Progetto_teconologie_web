@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+<div class="card my-3" style="overflow-wrap: break-word">
+{#    HEADER    #}
+    <div class="card-header align-content-center" style="overflow-wrap: break-word">
+
+        <div class="row">
+            <div class="col-9 justify-content-start">
+                <article class="card_text">
+                    <span class="font-weight-bold">Review of:</span>
+                    <a class="card_text" href="{% url 'book_functionalities:book-detail' review.book.id %}">
+                        {{ review.book.title }}
+                    </a>
+                    <br>
+                    <span class="font-weight-bold">Book by:</span>
+                    <a class="card_text" href="{% url 'book_functionalities:author-detail' review.book.author.id %}">
+                        {{ review.book.author.full_name }}
+                    </a>
+                </article>
+            </div>
+
+           <div class="col-3 justify-content-end">
+               <article class="float-right">
+                   {{ review.rating }}<i class="fas fa-star" style="color: gold"></i>
+               </article>
+           </div>
+
+        </div>
+    </div>
+{#   FINE HEADER    #}
+{#    BODY    #}
+    <div class="card-body row">
+        <div class="col-md-2 col-3 border-right">
+            <a href="{% url 'book_functionalities:book-detail' review.book.id %}">
+                <img src="{{ review.book.displayable_cover }}" class="img-fluid mh-100" alt="book-cover">
+            </a>
+        </div>
+        <div class="col-md-10 col-9">
+            <p class="card_text">
+                {{ review.content }}
+            </p>
+        </div>
+    </div>
+{#    FINE BODY    #}
+{#   FOOTER   #}
+    <div class="card-footer" style="height: 1.75cm">
+        <a href="{% url 'user_profile:user-profile-detail' review.user_profile.id %}" class="card_text">
+        {{ review.user_profile.user.username|truncatechars:20 }}
+        </a>
+        <br>
+        <p class="float-left align-self-baseline card_datetime">{{ review.creation_datetime }}</p>
+
+
+        {% if user.id == review.user_profile.user.id or user.is_superuser or user.is_moderator and not review.user_profile.user.is_superuser %}
+
+            <article class="float-right mt-n4">
+    {#                {% if review.spoiler %}#}
+    {#                        <a href="#" class="btn mr-2"#}
+    {#                           style="background-color: #533988 !important;">#}
+    {#                            <span style="color: white">Spoiler</span>#}
+    {#                        </a>#}
+    {#                {% endif %}#}
+                <a href="{% url 'book_functionalities:book-review-edit' review.id %}" class="btn btn-warning mr-2">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <a href="{% url 'book_functionalities:book-review-delete' review.id %}" class="btn btn-danger">
+                    <i class="fas fa-eraser"></i>
+                </a>
+            </article>
+
+
+        {% else %}
+            <article class="float-right mt-n4">
+{#                {% if review.spoiler %}#}
+{#                    <a href="#" class="btn mr-2"#}
+{#                       style="background-color: #533988 !important;">#}
+{#                        <span style="color: white">Spoiler</span>#}
+{#                    </a>#}
+{#                {% endif %}#}
+
+                <button id="report_active_{{ review }}"
+                            onclick="report('{{ review.id }}')" class="btn btn-danger"><i class="far fa-flag"></i></button>
+            </article>
+        {% endif %}
+    </div>
+{#   FINE FOOTER   #}
+</div>
+
+<style>
+     @media(max-width: 768px) {
+         .card_text {
+             font-size: small;
+         }
+         .card_datetime{
+             font-size: smaller;
+         }
+     }
+        @media(min-width: 768px) {
+         .card_datetime {
+             font-size: small;
+         }
+     }
+</style>
+

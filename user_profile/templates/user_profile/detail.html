@@ -34,99 +34,173 @@
                             Full Name:</span><br>
                             {{ object.first_name }} {{ object.last_name}}
                         </p>
+                        {% if user.id != object.user.id %}
+                            {% if object in user.profile.followed_list %}
+                                <div class="row justify-content-center">
+                                    <button id="unfollow_btn" onclick="unfollow()" class="btn btn-outline-danger mb-2">
+                                        Unfollow
+                                    </button>
+                                    <button id="follow_btn" onclick="follow()" class="btn btn-outline-primary mb-2" style="display: none">
+                                        Follow
+                                    </button>
+                                </div>
+                            {% else %}
+                                <div class="row justify-content-center">
+                                    <button id="unfollow_btn" onclick="unfollow()" class="btn btn-outline-danger mb-2" style="display: none">
+                                        Unfollow
+                                    </button>
+                                    <button id="follow_btn" onclick="follow()" class="btn btn-outline-primary mb-2">
+                                        Follow
+                                    </button>
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                        {% if user.id == object.user.id or user.is_superuser or user.is_moderator and not object.user.is_superuser %}
+                            <div class="row justify-content-center">
+                                <a href="{% url 'user_profile:user-profile-edit' object.id %}" class="btn btn-warning float-left">
+                                    <i class="fas fa-user-edit mr-1"></i>Edit Profile
+                                </a>
+                            </div>
+                        {% endif %}
 
-                        {% if user.id == object.user.id or user.is_superuser %}
-                            <a href="{% url 'user_profile:user-profile-edit' object.id %}" class="btn btn-warning">
-                                <i class="fas fa-user-edit mr-1"></i>Edit Profile
+                    </div>
+                </div>
+            </div>
+{#      REVIEWS SECTION      #}
+
+            <div class="col-md-9 col-12">
+                <ul id="content_tabs" class="nav nav-tabs">
+                    <li class="nav-item">
+                        <a href="#reviews_pane" class="nav-link active" data-toggle="tab">Reviews</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#recommendations_pane" class="nav-link" data-toggle="tab">Recommendations</a>
+                    </li>
+                </ul>
+                <div class="tab-content border-bottom border-left border-right rounded-bottom">
+                    <div id="reviews_pane" role="tabpanel" class="tab-pane active">
+                        <div class="container rounded border-right border-bottom border-left" style="height: 10cm; overflow-y: scroll">
+                            {% if not object.reviews %}
+                                <p class="mt-2"><span style="color: gray">No reviews to show</span></p>
+                            {% endif %}
+                            {% for review in object.reviews %}
+{#           REVIEW CARD             #}
+                                {% include 'book_functionalities/book_review/card.html' with review=review %}
+{#           REVIEW CARD END           #}
+                            {% endfor %}
+                        </div>
+                        {% if user.id == object.user.id %}
+                            <a href="{% url 'book_functionalities:book-review-create' %}" class="btn btn-primary float-right mt-2">
+                                Create
+                            </a>
+                        {% endif %}
+                    </div>
+                    <div id="recommendations_pane" role="tabpanel" class="tab-pane">
+                        <div class="container rounded border-right border-bottom border-left" style="height: 10cm; overflow-y: scroll">
+{#           RECOMMENDATION CARD             #}
+                            {% if not object.recommendations %}
+                                <p class="mt-2"><span style="color: gray">No recommendations to show</span></p>
+                            {% endif %}
+                            {% for recommendation in object.recommendations %}
+                                {% include 'book_functionalities/book_recommendation/card.html' with recommendation=recommendation %}
+                            {% endfor %}
+{#           RECOMMENDATION CARD END             #}
+                        </div>
+                        {% if user.id == object.user.id %}
+                            <a href="{% url 'book_functionalities:book-recommendation-create' %}" class="btn btn-primary float-right mt-2">
+                                Create
                             </a>
                         {% endif %}
                     </div>
                 </div>
             </div>
-{#      REVIEWS SECTION      #}
-            <div class="col-md-9 col-12">
-                <article class="mt-5 mt-md-0">
-                    <a href="{% url 'book_functionalities:book-review-create' %}" class="btn btn-primary float-right mb-2">
-                        Create
-                    </a>
-                    <h5>Reviews</h5>
-                </article>
-
-
-
-                <div class="container rounded border" style="height: 80%; overflow-y: scroll">
-                    {% for review in object.reviews %}
-{#           REVIEW CARD             #}
-                        <div class="card my-3" style="overflow-wrap: break-word">
-                            <div class="card-header align-content-center" style="overflow-wrap: break-word">
-                                <div class="row">
-                                    <div class="col-10 justify-content-start">
-                                        <article>
-                                            Review of:
-                                            <a href="{% url 'book_functionalities:book-detail' review.book.id %}">
-                                                {{ review.book.title }}
-                                            </a>
-                                        </article>
-                                    </div>
-
-                                   <div class="col-2 justify-content-start">
-                                       <article>
-                                           {{ review.rating }}<i class="fas fa-star" style="color: gold"></i>
-                                       </article>
-                                   </div>
-
-                                </div>
-                            </div>
-                            <div class="card-body row">
-                                <div class="col-md-2 col-3 border-right">
-                                    <a href="{% url 'book_functionalities:book-detail' review.book.id %}">
-                                        <img src="{{ review.book.displayable_cover }}" class="img-fluid mh-100" alt="book-cover">
-                                    </a>
-                                </div>
-                                <div class="col-md-10 col-9">
-                                    <p>
-                                        {{ review.content }}
-                                    </p>
-                                </div>
-                            </div>
-                                <div class="card-footer">
-                                    {% if user.id == object.user.id or user.is_superuser or user.is_moderator and not object.user.is_superuser %}
-                                    <article class="float-right">
-                                        {% if review.spoiler %}
-                                                <a href="#" class="btn mr-2"
-                                                   style="background-color: #533988 !important;">
-                                                    <span style="color: white">Spoiler</span>
-                                                </a>
-                                        {% endif %}
-                                        <a href="{% url 'book_functionalities:book-review-edit' review.id %}" class="btn btn-warning mr-2">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <a href="{% url 'book_functionalities:book-review-delete' review.id %}" class="btn btn-danger">
-                                            <i class="fas fa-eraser"></i>
-                                        </a>
-                                    </article>
-                                    {% else %}
-                                        <article class="float-right">
-                                            {% if review.spoiler %}
-                                                <a href="#" class="btn mr-2"
-                                                   style="background-color: #533988 !important;">
-                                                    <span style="color: white">Spoiler</span>
-                                                </a>
-                                            {% endif %}
-                                            <a href="#" class="btn btn-danger"><i class="far fa-flag"></i></a>
-                                        </article>
-                                    {% endif %}
-                                </div>
-                            </div>
-{#            FINE REVIEW CARD            #}
-                    {% endfor %}
-                </div>
-            </div>
         </div>
     </div>
+
+{#    REPORT(TOAST)     #}
+    {% include 'book_functionalities/report_toasts.html' %}
+
     <style>
          @media(min-width: 768px){
-     #user_card{margin-top: 0.5cm}
-     }
+            #user_card {
+                margin-top: 0.5cm
+            }
+
+         }
+         @media(max-width: 768px) {
+             #content_tabs {
+                 margin-top: 1cm
+             }
+         }
     </style>
+{% endblock %}
+
+{% block javascript %}
+    <script>
+        function follow() {
+            $.ajax({
+                type: 'GET',
+                url: '{% url 'user_profile:ajax-follow' %}',
+                data: {
+                    'follower': "{{ user.profile.id }}" ,
+                    'followed': "{{ object.id }}"
+                },
+
+                dataType: "json",
+                success: function (data) {
+                    if (data.is_success) {
+                        document.getElementById('unfollow_btn').style.display = 'block';
+                        document.getElementById('follow_btn').style.display = 'none';
+                    }
+                }
+            })
+        }
+        function unfollow() {
+            $.ajax({
+                type: 'GET',
+                url: '{% url 'user_profile:ajax-unfollow' %}',
+                data: {
+                    'follower': "{{ user.profile.id }}" ,
+                    'followed': "{{ object.id }}"
+                },
+
+                dataType: "json",
+                success: function (data) {
+                    if (data.is_success) {
+                        document.getElementById('unfollow_btn').style.display = 'none';
+                        document.getElementById('follow_btn').style.display = 'block';
+                    }
+                }
+            })
+        }
+
+
+        function report(review_id) {
+            $.ajax({
+                type: 'GET',
+                url: '{% url 'book_functionalities:ajax-report' %}',
+                data: {
+                    'review': review_id,
+                },
+
+                dataType: "json",
+                success: function (data) {
+
+
+                    if (data.is_success) {
+                        $('#report_success').toast('show')
+                    }
+                    else {
+                        if(data.already_reported) {
+                            $('#already_reported').toast('show')
+                        }
+                        else {
+                            $('#report_failed').toast('show')
+                        }
+                    }
+
+                }
+            })
+        }
+    </script>
 {% endblock %}

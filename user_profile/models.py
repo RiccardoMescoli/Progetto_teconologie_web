@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from django.db import models
 
 from book import settings
-from book_functionalities.models import BookReview
+from book_functionalities.models import BookRecommendation, BookReview
 
 
 class ExtendedUser(AbstractUser):
@@ -37,6 +37,9 @@ class ExtendedUser(AbstractUser):
         if not self.terms_of_service_acceptance:
             raise ValidationError(_("To proceed you must accept the terms of service"))
 
+    def __str__(self):
+        return f'User: {self.username}'
+
 
 class UserProfile(models.Model):
 
@@ -44,6 +47,9 @@ class UserProfile(models.Model):
     # profile_picture = ImageCropField(upload_to='profile_picture', blank=True)
     # cropping = ImageRatioField('profile_picture', '500x500')
     # cropping.verbose_name = ''
+
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
 
     @property
     def displayable_propic(self):
@@ -56,8 +62,17 @@ class UserProfile(models.Model):
     def reviews(self):
         return BookReview.objects.filter(user_profile=self)
 
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
+    @property
+    def recommendations(self):
+        return BookRecommendation.objects.filter(user_profile=self)
+
+    @property
+    def followed_list(self):
+        following_relations = UserProfileFollow.objects.filter(follower=self)
+        followed_list = list()
+        for relation in following_relations:
+            followed_list.append(relation.followed)
+        return followed_list
 
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
@@ -89,5 +104,35 @@ class UserProfile(models.Model):
         return res
 
 
+class UserProfileFollow(models.Model):
 
+    follower = models.ForeignKey(
+        settings.PROFILE_MODEL,
+        on_delete=models.CASCADE,
+        related_name='follower',
+    )
 
+    followed = models.ForeignKey(
+        settings.PROFILE_MODEL,
+        on_delete=models.CASCADE,
+        related_name='followed',
+    )
+
+    creation_datetime = models.DateTimeField(auto_now_add=True)
+
+    def clean(self):
+        if self.follower == self.followed:
+            raise ValidationError(_("You can't follow yourself"))
+        try:
+            UserProfileFollow.objects.get(follower=self.follower, followed=self.followed)
+            raise ValidationError(_("You already follow this user"))
+        except UserProfileFollow.DoesNotExist:
+            pass
+
+    class Meta:
+        verbose_name = 'user profile follow'
+        verbose_name_plural = 'user profile follows'
+        unique_together = ('follower', 'followed')
+
+    def __str__(self):
+        return f'{self.follower.user.username} follows {self.followed.user.username}'

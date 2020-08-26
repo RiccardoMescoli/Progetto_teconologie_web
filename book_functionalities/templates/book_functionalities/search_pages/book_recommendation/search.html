@@ -1,0 +1,37 @@
+{% extends 'book_functionalities/search_pages/search_base.html' %}
+{% load static %}
+
+{% block title %}
+    Recommendation search
+{% endblock %}
+
+{% block body_title %}
+    Recommendation Search
+{% endblock %}
+
+{% block form_content %}
+    <input class="form-control mr-sm-2" id="author_search"
+           type="search" placeholder="Author name" name="author" aria-label="Search">
+    <input class="form-control mr-sm-2" id="title_search"
+           type="search" placeholder="Book title" name="title" aria-label="Search">
+    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+{% endblock %}
+
+{% block results_container %}
+    {% if results_list %}
+        {% for recommendation in results_list %}
+            {% include 'book_functionalities/book_recommendation/card.html' with recommendation=recommendation %}
+        {% endfor %}
+    {% else %}
+        {% if author_query == "" and title_query == "" %}
+            <p class="mt-2"><span style="color: gray; font-size: large">No results found</span></p>
+        {% endif %}
+    {% endif %}
+{% endblock %}
+
+{% block javascript %}
+    <script>
+        document.getElementById("author_search").value = "{{ author_query }}"
+        document.getElementById("title_search").value = "{{ title_query }}"
+    </script>
+{% endblock %}

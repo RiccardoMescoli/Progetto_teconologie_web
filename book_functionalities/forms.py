@@ -2,7 +2,7 @@ from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Button, Submit
 
-from book_functionalities.models import Author, Book, BookGenre, BookReview
+from book_functionalities.models import Author, Book, BookGenre, BookRecommendation, BookReview
 
 
 class BaseForm(forms.ModelForm):
@@ -108,6 +108,12 @@ class BookReviewCreateForm(BaseForm):
         self.fields['content'].label = 'Content (MaxChars: 500)'
         self.fields['content'].widget = forms.Textarea(attrs={'maxlenght': 500, 'rows': 5, 'cols': 100})
         self.fields['rating'].label = 'rating'
+        self.fields['rating'].widget = forms.Select(
+            choices=[(i, i) for i in range(1, 11)],
+            attrs={
+                'style': 'width:2cm',
+            },
+        )
 
     '''
     def clean(self):
@@ -116,7 +122,7 @@ class BookReviewCreateForm(BaseForm):
 
     class Meta:
         model = BookReview
-        fields = ('book', 'rating', 'spoiler', 'content',)
+        fields = ('book', 'rating', 'content',) # The field 'spoiler' will not be specified until i decide what to do
 
 
 class BookReviewEditForm(BaseForm):
@@ -130,12 +136,30 @@ class BookReviewEditForm(BaseForm):
         self.fields['content'].label = 'Content (MaxChars: 500)'
         self.fields['content'].widget = forms.Textarea(attrs={'maxlenght': 500, 'rows': 5, 'cols': 100})
         self.fields['rating'].label = 'rating'
+        self.fields['rating'].widget = forms.Select(
+            choices=[(i, i) for i in range(1, 11)],
+            attrs={
+                'style': 'width:2cm',
+            },
+        )
 
     class Meta:
         model = BookReview
-        fields = ('book', 'rating', 'spoiler', 'content',)
+        fields = ('book', 'rating', 'content',) # The field 'spoiler' will not be specified until i decide what to do
 
 
+class BookRecommendationCreateForm(BaseForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper.form_id = 'book-recommendation-create-form'
+        self.helper.inputs[0].value = 'Create'
+        self.helper.inputs[0].field_classes = 'btn btn-success'
+        self.fields['base_book'].label = 'Base Book'
+        self.fields['recommended_book'].label = 'Recommended Book'
+
+    class Meta:
+        model = BookRecommendation
+        fields = ('base_book', 'recommended_book')
 
 
 

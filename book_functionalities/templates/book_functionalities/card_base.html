@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+<div class="card my-3" style="overflow-wrap: break-word">
+{#    HEADER    #}
+    <div class="card-header align-content-center" style="overflow-wrap: break-word">
+        {% block card_header %}
+        
+        {% endblock %}
+    </div>
+{#   FINE HEADER    #}
+{#    BODY    #}
+    <div class="card-body row">
+        {% block card_body %}
+        
+        {% endblock %}
+    </div>
+{#    FINE BODY    #}
+{#   FOOTER   #}
+    <div class="card-footer">
+        {% block card_footer %}
+        
+        {% endblock %}
+    </div>
+{#   FINE FOOTER   #}
+</div>

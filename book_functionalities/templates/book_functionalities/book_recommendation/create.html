@@ -1,0 +1,40 @@
+{% extends 'base.html' %}#
+{% load static %}
+{% load crispy_forms_tags %}
+
+
+{% block title %}Recommendation creation{% endblock %}
+
+{% block content %}
+    <h1>Recommendation creation</h1>
+    <label for="base_book_filter" for="recommended_book_filter">
+                Book filters </label>
+    <input class="form-control" id="base_book_filter" type="text" placeholder="Type to filter the Base Book field..">
+    <input class="form-control mb-3" id="recommended_book_filter" type="text" placeholder="Type to filter the Recommended Book field..">
+
+    {% crispy form %}
+
+
+{% endblock %}
+
+{% block javascript %}
+    <script>
+        $(document).ready(function(){
+            $("#base_book_filter").on("keyup", function() {
+                let value = $(this).val().toLowerCase();
+                $("#id_base_book *").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+              });
+        });
+
+        $(document).ready(function(){
+            $("#recommended_book_filter").on("keyup", function() {
+                let value = $(this).val().toLowerCase();
+                $("#id_recommended_book *").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+              });
+        });
+    </script>
+{% endblock %}

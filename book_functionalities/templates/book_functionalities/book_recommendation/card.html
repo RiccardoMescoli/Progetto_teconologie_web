@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+<div class="card my-3" style="overflow-wrap: break-word">
+{#    HEADER    #}
+    <div class="card-header align-content-center" style="overflow-wrap: break-word">
+        <div class="row">
+            <div class="col-6 border-right">
+                <p class="mb-n1 mb-md-0">
+                    <span class="font-weight-bold card_text">If you liked:</span><br>
+                </p>
+            </div>
+            <div class="col-6">
+                <p class="mb-n1 mb-md-0">
+                    <span class="font-weight-bold card_text">You may also like:</span><br>
+                </p>
+            </div>
+        </div>
+    </div>
+{#   FINE HEADER    #}
+{#    BODY    #}
+    <div class="card-body row">
+
+        <div class="col-md-2 col-6 border-right d-none d-md-block">
+            <a href="{% url 'book_functionalities:book-detail' recommendation.base_book.id %}">
+                <img src="{{ recommendation.base_book.displayable_cover }}" class="img-fluid mh-100" alt="base_book_cover">
+            </a>
+        </div>
+        <div class="col-md-4 col-6 border-right card_text ">
+            <p>
+                <span class="font-weight-bold">Title:</span><br>
+                <a href="{% url 'book_functionalities:book-detail' recommendation.base_book.id %}">
+                            {{ recommendation.base_book.title }}
+                </a>
+            </p>
+        </div>
+        <div class="col-md-4 col-6 card_text">
+            <p>
+                <span class="font-weight-bold">Title:</span><br>
+                <a href="{% url 'book_functionalities:book-detail' recommendation.recommended_book.id %}">
+                            {{ recommendation.recommended_book.title }}
+                </a>
+            </p>
+        </div>
+        <div class="col-md-2 col-6 border-left d-none d-md-block">
+            <a href="{% url 'book_functionalities:book-detail' recommendation.recommended_book.id %}">
+                <img src="{{ recommendation.recommended_book.displayable_cover }}" class="img-fluid mh-100" alt="recommended_book_cover">
+            </a>
+        </div>
+    </div>
+{#    FINE BODY    #}
+{#   FOOTER   #}
+    <div class="card-footer" style="height: 1.75cm">
+        <a href="{% url 'user_profile:user-profile-detail' recommendation.user_profile.id %}" class="card_text">
+        {{ recommendation.user_profile.user.username|truncatechars:20 }}
+        </a>
+        <br>
+        <p class="float-left align-self-baseline card_datetime">{{ recommendation.creation_datetime }}</p>
+
+        {% if user.id == object.user.id or user.is_superuser or user.is_moderator and not object.user.is_superuser %}
+            <article class="float-right mt-n4">
+                <a href="{% url 'book_functionalities:book-recommendation-delete' recommendation.id %}" class="btn btn-danger">
+                    <i class="fas fa-eraser"></i>
+                </a>
+            </article>
+        {% endif %}
+    </div>
+{#   FINE FOOTER   #}
+<style>
+     @media(max-width: 768px) {
+         .card_text {
+             font-size: small;
+         }
+         .card_datetime {
+             font-size: smaller;
+         }
+     }
+    @media(min-width: 768px) {
+         .card_datetime {
+             font-size: small;
+         }
+     }
+</style>
+</div>

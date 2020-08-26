@@ -1,10 +1,8 @@
 import os
 from statistics import mean
 
-from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator
 from django.db import models
-from django.utils.translation import gettext_lazy as _
 
 from book import settings
 
@@ -25,6 +23,7 @@ class Author(models.Model):
     biography = models.TextField()
 
     class Meta:
+        ordering = ['full_name']
         verbose_name = 'author'
         verbose_name_plural = 'authors'
 
@@ -112,6 +111,7 @@ class Book(models.Model):
     )
 
     class Meta:
+        ordering = ['title', 'author']
         verbose_name = 'book'
         verbose_name_plural = 'books'
 
@@ -145,9 +145,11 @@ class Book(models.Model):
 
 class BookReview(models.Model):
 
-    spoiler = models.BooleanField(default=False)
+    # spoiler = models.BooleanField(default=False)
     content = models.CharField(max_length=500)
-    rating = models.PositiveSmallIntegerField(MaxValueValidator(10, message="The score can't be higher than 10"))
+    rating = models.PositiveSmallIntegerField(
+        validators=[MaxValueValidator(10, message="The rating can't be higher than 10"), ]
+    )
 
     user_profile = models.ForeignKey(
         settings.PROFILE_MODEL,
@@ -158,12 +160,67 @@ class BookReview(models.Model):
         on_delete=models.CASCADE,
     )
 
+    @property
+    def reported_by(self):
+        reported_by = ReviewReport.objects.filter(review=self)
+        users = list()
+        for report in reported_by:
+            users.append(report['user'].id)
+        return users
+
     creation_datetime = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        ordering = ['book']
         verbose_name = 'book review'
         verbose_name_plural = 'book reviews'
         unique_together = ['user_profile', 'book']
 
     def __str__(self):
         return f'Review of {self.book.title} by {self.user_profile.user.username}'
+
+
+class ReviewReport(models.Model):
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+    review = models.ForeignKey(
+        BookReview,
+        on_delete=models.CASCADE,
+    )
+
+    def __str__(self):
+        return f'Report of "{self.review}" by {self.user.username}'
+
+
+class BookRecommendation(models.Model):
+
+    user_profile = models.ForeignKey(
+        settings.PROFILE_MODEL,
+        on_delete=models.CASCADE
+    )
+
+    base_book = models.ForeignKey(
+        Book,
+        on_delete=models.CASCADE,
+        related_name='base_book',
+    )
+    recommended_book = models.ForeignKey(
+        Book,
+        on_delete=models.CASCADE,
+        related_name='recommended_book',
+    )
+
+    creation_datetime = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['base_book', 'recommended_book']
+        verbose_name = 'book recommendation'
+        verbose_name_plural = 'book recommendations'
+        unique_together = ['user_profile', 'base_book', 'recommended_book']
+
+    def __str__(self):
+        return f"Recommendation: {self.base_book.title}->{self.recommended_book.title}" \
+               f" by {self.user_profile.user.username}"

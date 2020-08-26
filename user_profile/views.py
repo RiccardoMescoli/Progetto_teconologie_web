@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.shortcuts import redirect
 
 from django.urls import reverse, reverse_lazy
@@ -6,7 +7,9 @@ from django.views.generic import CreateView, DetailView, UpdateView
 
 from user_profile.decorators import no_profile, profile_required
 from user_profile.forms import ExtendedUserCreationForm, UserProfileCreateForm, UserProfileEditForm
-from user_profile.models import UserProfile
+from user_profile.models import UserProfile, UserProfileFollow
+
+# --------- User and Profile ---------
 
 
 class UserCreateView(CreateView):
@@ -46,20 +49,86 @@ class UserProfileEditView(UpdateView):
     model = UserProfile
     form_class = UserProfileEditForm
     template_name = 'user_profile/edit.html'
-    success_url = reverse_lazy('user_profile:own-user-profile-detail')
 
     def form_valid(self, form):
-        if 'cancel' in self.request.POST:
-            return redirect(reverse_lazy('user_profile:user-profile-detail', args=(self.kwargs.get('pk'),)))
-
+        self.success_url = reverse_lazy('user_profile:user-profile-detail', args=(self.kwargs['pk'],))
         return super(UserProfileEditView, self).form_valid(form)
 
     def dispatch(self, request, *args, **kwargs):
-        if request.user.profile.id == kwargs['pk'] or request.user.is_superuser:
-            return super().dispatch(request, *args, **kwargs)
-        else:
-            return redirect(reverse('user_profile:own-user-profile-detail'))
+        try:
+            if request.user.profile.id == kwargs['pk'] or request.user.is_superuser or request.user.is_moderator \
+                    and not UserProfile.objects.get(pk=kwargs['pk']).user.is_superuser:
+                return super().dispatch(request, *args, **kwargs)
+        except UserProfile.DoesNotExist:
+            pass
+
+        return redirect(reverse('user_profile:own-user-profile-detail'))
 
 
+# -------------- Ajax -------------
+
+@profile_required
+def ajax_follow_create(request):
+    try:
+        follower = UserProfile.objects.get(pk=int(request.GET.get('follower', False)))
+        followed = UserProfile.objects.get(pk=int(request.GET.get('followed', False)))
+    except UserProfile.DoesNotExist:
+        return JsonResponse(
+            {
+                'is_success': False
+            }
+        )
+
+    if request.user.id != follower.user.id:
+        return JsonResponse(
+            {
+                'is_success': False
+            }
+        )
+
+    instance, _ = UserProfileFollow.objects.get_or_create(follower=follower, followed=followed)
+    instance.save()
+
+    return JsonResponse(
+        {
+            'is_success': True
+        }
+    )
+
+
+@profile_required
+def ajax_follow_delete(request):
+    try:
+        follower = UserProfile.objects.get(pk=int(request.GET.get('follower', False)))
+        followed = UserProfile.objects.get(pk=int(request.GET.get('followed', False)))
+    except UserProfile.DoesNotExist:
+        return JsonResponse(
+            {
+                'is_success': False
+            }
+        )
+
+    if request.user.id != follower.user.id:
+        return JsonResponse(
+            {
+                'is_success': False
+            }
+        )
+
+    try:
+        instance = UserProfileFollow.objects.get(follower=follower, followed=followed)
+        instance.delete()
+    except UserProfileFollow.DoesNotExist:
+        return JsonResponse(
+            {
+                'is_success': False
+            }
+        )
+
+    return JsonResponse(
+        {
+            'is_success': True
+        }
+    )
 
 

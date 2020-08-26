@@ -20,7 +20,22 @@ urlpatterns = [
     path('book_genre/<int:pk>/edit', views.BookGenreEditView.as_view(), name='book-genre-edit'),
     path('book_genre/<int:pk>/delete', views.BookGenreDeleteView.as_view(), name='book-genre-delete'),
 
+    path('book_review/search', views.book_review_search_view, name='book-review-search'),
     path('user/book_review/create', views.BookReviewCreateView.as_view(), name='book-review-create'),
     path('user/book_review/<int:pk>/edit', views.BookReviewEditView.as_view(), name='book-review-edit'),
     path('user/book_review/<int:pk>/delete', views.BookReviewDeleteView.as_view(), name='book-review-delete'),
+
+    path('book_recommendation/search', views.book_recommendation_search_view, name='book-recommendation-search'),
+    path(
+        'user/book_recommendation/create',
+        views.BookRecommendationCreateView.as_view(),
+        name='book-recommendation-create'
+    ),
+    path(
+        'user/book_recommendation/<int:pk>/delete',
+        views.BookRecommendationDeleteView.as_view(),
+        name='book-recommendation-delete'
+    ),
+
+    path('ajax/report', views.ajax_report_review, name='ajax-report'),
 ]

@@ -1,0 +1,46 @@
+{% extends 'base.html' %}#
+{% load static %}
+
+{% block title %}
+
+{% endblock %}
+
+
+{% block content %}
+    <article>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light border rounded-top">
+
+            <h4><span class="font-italic font-weight-light my-auto mr-auto">{% block body_title %}{% endblock %}</span></h4>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#searchbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+          </button>
+
+              <div class="collapse navbar-collapse" id="searchbarSupportedContent">
+                <form class="form-inline my-2 my-lg-0 ml-auto">
+                    {% block form_content %}
+
+                    {% endblock %}
+                </form>
+              </div>
+            </nav>
+        <div class="container rounded-bottom border-right border-bottom border-left"
+             style="height: 500px; width: 100%; overflow-y: scroll">
+            {% block results_container %}
+
+            {% endblock %}
+        </div>
+    </article>
+    {% block other_content %}
+
+    {% endblock %}
+
+    <style>
+        {% block content_style %}
+
+        {% endblock %}
+    </style>
+{% endblock %}
+
+{% block javascript %}
+
+{% endblock %}
