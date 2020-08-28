@@ -27,42 +27,43 @@
                     </div>
                     <div class="card-body" style="width: 250px; height: 250px">
                         <img class="card-img-top rounded-circle img-fluid mh-100" src="{{object.displayable_propic}}"
-                             alt="profile picture">
+                             alt="profile picture" style="height: 250px; width: 250px">
                     </div>
                     <div class="card-footer">
                         <p><span style="font-weight: bold">
                             Full Name:</span><br>
                             {{ object.first_name }} {{ object.last_name}}
                         </p>
-                        {% if user.id != object.user.id %}
-                            {% if object in user.profile.followed_list %}
+                        {% if user.is_authenticated %}
+                            {% if user.id != object.user.id %}
+                                {% if object in user.profile.followed_list %}
+                                    <div class="row justify-content-center">
+                                        <button id="unfollow_btn" onclick="unfollow()" class="btn btn-outline-danger mb-2">
+                                            Unfollow
+                                        </button>
+                                        <button id="follow_btn" onclick="follow()" class="btn btn-outline-primary mb-2" style="display: none">
+                                            Follow
+                                        </button>
+                                    </div>
+                                {% else %}
+                                    <div class="row justify-content-center">
+                                        <button id="unfollow_btn" onclick="unfollow()" class="btn btn-outline-danger mb-2" style="display: none">
+                                            Unfollow
+                                        </button>
+                                        <button id="follow_btn" onclick="follow()" class="btn btn-outline-primary mb-2">
+                                            Follow
+                                        </button>
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+                            {% if user.id == object.user.id or user.is_superuser or user.is_moderator and not object.user.is_superuser %}
                                 <div class="row justify-content-center">
-                                    <button id="unfollow_btn" onclick="unfollow()" class="btn btn-outline-danger mb-2">
-                                        Unfollow
-                                    </button>
-                                    <button id="follow_btn" onclick="follow()" class="btn btn-outline-primary mb-2" style="display: none">
-                                        Follow
-                                    </button>
-                                </div>
-                            {% else %}
-                                <div class="row justify-content-center">
-                                    <button id="unfollow_btn" onclick="unfollow()" class="btn btn-outline-danger mb-2" style="display: none">
-                                        Unfollow
-                                    </button>
-                                    <button id="follow_btn" onclick="follow()" class="btn btn-outline-primary mb-2">
-                                        Follow
-                                    </button>
+                                    <a href="{% url 'user_profile:user-profile-edit' object.id %}" class="btn btn-warning">
+                                        <i class="fas fa-user-edit mr-1"></i>Edit Profile
+                                    </a>
                                 </div>
                             {% endif %}
                         {% endif %}
-                        {% if user.id == object.user.id or user.is_superuser or user.is_moderator and not object.user.is_superuser %}
-                            <div class="row justify-content-center">
-                                <a href="{% url 'user_profile:user-profile-edit' object.id %}" class="btn btn-warning float-left">
-                                    <i class="fas fa-user-edit mr-1"></i>Edit Profile
-                                </a>
-                            </div>
-                        {% endif %}
-
                     </div>
                 </div>
             </div>
@@ -106,7 +107,7 @@
                             {% endfor %}
 {#           RECOMMENDATION CARD END             #}
                         </div>
-                        {% if user.id == object.user.id %}
+                        {% if user.is_authenticated and user.id == object.user.id %}
                             <a href="{% url 'book_functionalities:book-recommendation-create' %}" class="btn btn-primary float-right mt-2">
                                 Create
                             </a>

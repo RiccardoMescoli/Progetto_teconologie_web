@@ -1,0 +1,34 @@
+{% extends 'search_base.html' %}
+{% load static %}
+
+{% block title %}
+    Profile search
+{% endblock %}
+
+{% block body_title %}
+    Profile Search
+{% endblock %}
+
+{% block form_content %}
+    <input class="form-control mr-sm-2" id="profile_search"
+           type="search" placeholder="Search..." name="query" aria-label="Search">
+    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+{% endblock %}
+
+{% block results_container %}
+    {% if results_list %}
+        {% for profile in results_list %}
+            {% include 'user_profile/card.html' with profile=profile %}
+        {% endfor %}
+    {% else %}
+        {% if query == "" %}
+            <p class="mt-2"><span style="color: gray; font-size: large">No results found</span></p>
+        {% endif %}
+    {% endif %}
+{% endblock %}
+
+{% block javascript %}
+    <script>
+        document.getElementById("profile_search").value = "{{ query }}"
+    </script>
+{% endblock %}

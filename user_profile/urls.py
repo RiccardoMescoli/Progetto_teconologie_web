@@ -8,6 +8,7 @@ app_name = 'user_profile'
 urlpatterns = [
     path('user/register', views.UserCreateView.as_view(), name='user-registration'),
 
+    path('search', views.user_profile_search_view, name='user-profile-search'),
     path('create', views.UserProfileCreateView.as_view(), name='user-profile-create'),
     path('<int:pk>/detail', views.UserProfileDetailView.as_view(), name='user-profile-detail'),
     path('detail', views.own_user_profile_detail_view, name='own-user-profile-detail'),

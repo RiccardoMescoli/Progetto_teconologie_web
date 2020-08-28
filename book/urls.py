@@ -23,9 +23,13 @@ from book import views
 
 urlpatterns = [
     path('', views.homepage, name='homepage'),
+    path('activity_feed', views.activities_feed_view, name='activity_feed'),
+    path('personalized_recommendations', views.personalized_recommendations_view, name='personalized_recommendations'),
+
     path('user_profile/', include('user_profile.urls')),
     path('user/login', auth_views.LoginView.as_view(), name='login'),
     path('user/logout', auth_views.LogoutView.as_view(), name='logout'),
     path('admin/', admin.site.urls),
+
     path('book_functionalities/', include('book_functionalities.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

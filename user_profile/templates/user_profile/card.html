@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<div class="card my-3" style="overflow-wrap: break-word">
+<a href="{% url 'user_profile:user-profile-detail' profile.id %}" class="stretched-link"></a>
+{#    BODY    #}
+    <div class="card-body row">
+        <div class="col-md-2 col-6 border-right">
+                <img src="{{ profile.displayable_propic }}" alt="profile picture"
+                         class="card-img rounded-circle">
+        </div>
+        <div class="col-md-8 col-6 card_text ">
+            <p>
+                <span class="font-weight-bold card_text">Username :</span><br>
+                    {{ profile.user.username|truncatechars:30 }}<br>
+                <span class="font-weight-bold">Full name:</span><br>
+                 {{ profile.first_name }} {{ profile.last_name }}
+            </p>
+        </div>
+    </div>
+{#        <div class="col-md-2 d-none d-md-block">#}
+{#            <article class="float-right">#}
+{#                {% if user.id != profile.user.id %}#}
+{#                    {% if profile in user.profile.followed_list %}#}
+{#                        <div class="row justify-content-center mr-2">#}
+{#                            <button id="unfollow_btn" onclick="unfollow()" class="btn btn-outline-danger">#}
+{#                                Unfollow#}
+{#                            </button>#}
+{#                            <button id="follow_btn" onclick="follow()" class="btn btn-outline-primary" style="display: none">#}
+{#                                Follow#}
+{#                            </button>#}
+{#                        </div>#}
+{#                    {% else %}#}
+{#                        <div class="row justify-content-center mr-2">#}
+{#                            <button id="unfollow_btn" onclick="unfollow()" class="btn btn-outline-danger" style="display: none">#}
+{#                                Unfollow#}
+{#                            </button>#}
+{#                            <button id="follow_btn" onclick="follow()" class="btn btn-outline-primary">#}
+{#                                Follow#}
+{#                            </button>#}
+{#                        </div>#}
+{#                    {% endif %}#}
+{#                {% endif %}#}
+{#            </article>#}
+{#        </div>#}
+{#    </div>#}
+{#    FINE BODY    #}
+{#   FOOTER   #}
+{#{% if user.id != profile.user.id %}#}
+{#    <div class="card-footer d-md-none" >#}
+{#        <article class="float-right">#}
+{#                {% if profile in user.profile.followed_list %}#}
+{#                    <div class="row justify-content-center">#}
+{#                        <button id="unfollow_btn" onclick="unfollow()" class="btn btn-outline-danger mr-3">#}
+{#                            Unfollow#}
+{#                        </button>#}
+{#                        <button id="follow_btn" onclick="follow()" class="btn btn-outline-primary" style="display: none">#}
+{#                            Follow#}
+{#                        </button>#}
+{#                    </div>#}
+{#                {% else %}#}
+{#                    <div class="row justify-content-center mr-2">#}
+{#                        <button id="unfollow_btn" onclick="unfollow()" class="btn btn-outline-danger mr-3" style="display: none">#}
+{#                            Unfollow#}
+{#                        </button>#}
+{#                        <button id="follow_btn" onclick="follow()" class="btn btn-outline-primary">#}
+{#                            Follow#}
+{#                        </button>#}
+{#                    </div>#}
+{#                {% endif %}#}
+{#        </article>#}
+{#    </div>#}
+{#{% endif %}#}
+</div>
+{#   FINE FOOTER   #}
+<style>
+     @media(max-width: 768px) {
+         .card_text {
+             font-size: small;
+         }
+         .card-img{
+             height: 135px;
+             width: 135px;
+         }
+     }
+     @media(min-width: 768px) {
+
+         .card-img {
+             height: 145px;
+             width: 145px;
+         }
+     }
+
+    .btn{
+        z-index: 1;
+    }
+</style>

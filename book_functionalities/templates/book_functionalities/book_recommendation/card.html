@@ -58,12 +58,14 @@
         <br>
         <p class="float-left align-self-baseline card_datetime">{{ recommendation.creation_datetime }}</p>
 
-        {% if user.id == object.user.id or user.is_superuser or user.is_moderator and not object.user.is_superuser %}
-            <article class="float-right mt-n4">
-                <a href="{% url 'book_functionalities:book-recommendation-delete' recommendation.id %}" class="btn btn-danger">
-                    <i class="fas fa-eraser"></i>
-                </a>
-            </article>
+        {% if user.is_authenticated %}
+            {% if user.id == recommendation.user_profile.user.id %}
+                <article class="float-right mt-n4">
+                    <a href="{% url 'book_functionalities:book-recommendation-delete' recommendation.id %}" class="btn btn-danger">
+                        <i class="fas fa-eraser"></i>
+                    </a>
+                </article>
+            {% endif %}
         {% endif %}
     </div>
 {#   FINE FOOTER   #}

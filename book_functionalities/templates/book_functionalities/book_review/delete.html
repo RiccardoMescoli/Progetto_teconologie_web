@@ -6,17 +6,30 @@
 {% block content %}
     <h1><span style="color: red">Are you sure?</span></h1>
     <p>
-        Are you sure you want to delete your review  of <span class="font-italic font-weight-bold" style="color: red">
-            '{{ object.book.title }} by {{ object.book.author.full_name }}'
-        </span>?
+        {% if user == object.user_profile.user %}
+            Are you sure you want to delete your review of
+            <span class="font-italic font-weight-bold" style="color: red">
+                '{{ object.book.title }} by {{ object.book.author.full_name }}'
+            </span>?
+        {% else %}
+            Are you sure you want to delete
+            <span class="font-italic font-weight-bold" style="color: red">
+                {{ object.user_profile.user.username }}
+            </span>'s review of
+            <span class="font-italic font-weight-bold" style="color: red">
+                '{{ object.book.title }} by {{ object.book.author.full_name }}'
+            </span>?
+        {% endif %}
     </p>
 
-    <form method="post">{% csrf_token %}
-        <input class="btn btn-danger mr-2 mt-2" type="submit" value="Delete">
-        <a class="btn btn-secondary mt-2"
-           href="{% url 'user_profile:user-profile-detail' object.user_profile.id %}">
-            Cancel
-        </a>
-    </form>
+    <div class="row justify-content-start ml-0">
+        <form method="post">{% csrf_token %}
+            <input class="btn btn-danger mr-2 mt-2" type="submit" value="Delete">
+        </form>
+        <button class="btn btn-secondary mt-2"
+               onclick="history.go(-1);">
+                Cancel
+        </button>
+    </div>
 
 {% endblock %}

@@ -83,6 +83,7 @@ class UserProfile(models.Model):
     class Meta:
         verbose_name = 'user profile'
         verbose_name_plural = 'user profiles'
+        ordering = ['last_name', 'first_name']
 
     def __str__(self):
         return f'Profile of {self.first_name} {self.last_name}'

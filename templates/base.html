@@ -54,6 +54,16 @@
                          Recommendations
                      </a>
                 </li>
+                <li class="nav-item">
+                     <a class="nav-link active" href="{% url 'book_functionalities:book-top-list' %}">
+                         Top list
+                     </a>
+                </li>
+                <li class="nav-item">
+                     <a class="nav-link active" href="{% url 'user_profile:user-profile-search' %}">
+                         Profiles
+                     </a>
+                </li>
             </ul>
 
         {#    ZONA LOGIN/LOGOUT E DATI UTENTE    #}
@@ -67,7 +77,9 @@
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                             <a class="dropdown-item" href="{% url 'book_functionalities:author-create' %}"><i class="fas fa-user-edit ml-n3 mr-1"></i>Author creation</a>
                             <a class="dropdown-item" href="{% url 'book_functionalities:book-create' %}"><i class="fas fa-edit ml-n3 mr-1"></i>Book creation</a>
+                            <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="{% url 'book_functionalities:book-genre-list' %}"><i class="fas fa-list ml-n3 mr-1"></i>Book Genres list</a>
+                            <a class="dropdown-item" href="{% url 'book_functionalities:report-list' %}"><i class="fas fa-flag ml-n3 mr-1"></i>Reports</a>
                         </div>
                     </li>
                 </ul>
@@ -85,6 +97,9 @@
                                 </a>
                                 <a class="dropdown-item" href="{% url 'user_profile:user-profile-edit' user.profile.id %}">
                                     <i class="fas fa-user-edit ml-n3 mr-1"></i>Edit Profile
+                                </a>
+                                <a class="dropdown-item" href="{% url 'personalized_recommendations' %}">
+                                    <i class="fas fa-book ml-n3 mr-2"></i> For me
                                 </a>
                             {% else %}
                                 <a class="dropdown-item" href="{% url 'user_profile:user-profile-create'%}">

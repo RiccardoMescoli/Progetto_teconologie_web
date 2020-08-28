@@ -1,53 +1,26 @@
 from django.db.models import Q
 
-from book_functionalities.models import Author, BookRecommendation, BookReview
+from user_profile.models import ExtendedUser, UserProfile
 
 
-def get_book_review_queryset(title="", author=""):
+def get_user_profile_queryset(query):
 
-    reviews = []
-    title_query = title.rstrip().lstrip()
-    author_query = author.rstrip().lstrip()
+    profiles = []
+    queries = query.rstrip().lstrip().split(" ")
 
-    if title_query != "":
-        if author_query != "":
-            reviews = BookReview.objects.filter(
-                Q(book__title__icontains=title_query),
-                Q(book__author__full_name__icontains=author_query)
-            ).distinct()
-        else:
-            reviews = BookReview.objects.filter(
-                Q(book__title__icontains=title_query)
-            ).distinct()
-    elif author_query != "":
-        reviews = BookReview.objects.filter(
-            Q(book__author__full_name__icontains=author_query)
-        ).distinct()
+    if len(queries) > 1:
+        profiles = UserProfile.objects.filter(
+            Q(first_name__icontains=queries[0]) and Q(last_name__icontains="".join(q+" " for q in queries[1:]).rstrip())
+        )
+    else:
+        users = ExtendedUser.objects.filter(
+            Q(username__icontains=query)
+        )
+        profiles = UserProfile.objects.filter(
+            Q(user__in=users) | Q(first_name__icontains=query) | Q(last_name__icontains=query)
+        )
 
-    queryset = list(set([review for review in reviews]))
+    queryset = list(set([profile for profile in profiles]))
     return queryset
 
 
-def get_book_recommendation_queryset(title="", author=""):
-
-    recommendations = []
-    title_query = title.rstrip().lstrip()
-    author_query = author.rstrip().lstrip()
-
-    if title_query != "":
-        if author_query != "":
-            recommendations = BookRecommendation.objects.filter(
-                Q(base_book__title__icontains=title_query),
-                Q(base_book__author__full_name__icontains=author_query)
-            ).distinct()
-        else:
-            recommendations = BookRecommendation.objects.filter(
-                Q(base_book__title__icontains=title_query)
-            ).distinct()
-    elif author_query != "":
-        recommendations = BookRecommendation.objects.filter(
-            Q(base_book__author__full_name__icontains=author_query)
-        ).distinct()
-
-    queryset = list(set([recommendation for recommendation in recommendations]))
-    return queryset

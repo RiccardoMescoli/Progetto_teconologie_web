@@ -1,0 +1,28 @@
+{% extends 'base.html' %}#
+{% load static %}
+
+{% block title %}Clear Review{% endblock %}
+
+{% block content %}
+    <h1><span style="color: blue">Are you sure?</span></h1>
+    <p>
+        Are you sure you want to clear
+        <span class="font-italic font-weight-bold" style="color: blue">
+            {{ review.user_profile.user.username }}
+        </span>'s review of
+        <span class="font-italic font-weight-bold" style="color: blue">
+            '{{ review.book.title }} by {{ review.book.author.full_name }}'
+        </span>?
+    </p>
+    <div class="row justify-content-start ml-0">
+        <form method="post">{% csrf_token %}
+            <input class="btn btn-primary mr-2 mt-2" type="submit" value="Clear">
+        </form>
+        <button class="btn btn-secondary mt-2"
+               onclick="history.go(-1);">
+                Cancel
+        </button>
+    </div>
+
+
+{% endblock %}

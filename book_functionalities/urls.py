@@ -9,6 +9,7 @@ urlpatterns = [
     path('author/<int:pk>/edit', views.AuthorEditView.as_view(), name='author-edit'),
     path('author/<int:pk>/delete', views.AuthorDeleteView.as_view(), name='author-delete'),
 
+    path('book/top_list', views.book_top_list_view, name='book-top-list'),
     path('book/create', views.BookCreateView.as_view(), name='book-create'),
     path('book/<int:pk>/detail', views.BookDetailView.as_view(), name='book-detail'),
     path('book/<int:pk>/edit', views.BookEditView.as_view(), name='book-edit'),
@@ -36,6 +37,9 @@ urlpatterns = [
         views.BookRecommendationDeleteView.as_view(),
         name='book-recommendation-delete'
     ),
+
+    path('report/list', views.report_list_view, name='report-list'),
+    path('book_review/<int:pk>/report/clear', views.review_report_clear, name='book-review-report-clear'),
 
     path('ajax/report', views.ajax_report_review, name='ajax-report'),
 ]

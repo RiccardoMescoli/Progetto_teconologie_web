@@ -1,7 +1,7 @@
 from operator import attrgetter
 
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import Http404, JsonResponse
 from django.shortcuts import redirect, render
 
 from django.urls import reverse_lazy
@@ -15,9 +15,11 @@ from book_functionalities.models import Author, Book, BookGenre, BookRecommendat
 
 from user_profile.decorators import moderators_only, profile_required
 
+from book_functionalities.search import get_book_recommendation_queryset, get_book_review_queryset, get_book_toplist, \
+    get_report_list
+
 
 # ---------------- AUTHOR -----------------
-from user_profile.search import get_book_recommendation_queryset, get_book_review_queryset
 
 
 class AuthorDetailView(DetailView):
@@ -175,9 +177,7 @@ class BookReviewEditView(UpdateView):
 
     def dispatch(self, request, *args, **kwargs):
         review = BookReview.objects.get(id=self.kwargs.get('pk'))
-        if request.user.id != review.user_profile.user.id \
-                and not (request.user.is_superuser
-                         or (request.user.is_moderator and not review.user_profile.user.is_superuser)):
+        if request.user.id != review.user_profile.user.id:
             return redirect(settings.LOGIN_URL)
         self.success_url = reverse_lazy('user_profile:user-profile-detail', args=(review.user_profile.id,))
         return super(BookReviewEditView, self).dispatch(request, args, kwargs)
@@ -210,6 +210,10 @@ class BookRecommendationCreateView(CreateView):
     def form_valid(self, form):
         profile = self.request.user.profile
 
+        if form.cleaned_data.get('base_book', None) == form.cleaned_data.get('recommended_book', None):
+            form.add_error('recommended_book', "The two books can't be the same")
+            return super(BookRecommendationCreateView, self).form_invalid(form)
+
         try:
             if BookRecommendation.objects.get(
                     user_profile=profile,
@@ -236,6 +240,34 @@ class BookRecommendationDeleteView(DeleteView):
     model = BookRecommendation
     template_name = 'book_functionalities/book_recommendation/delete.html'
     success_url = reverse_lazy('user_profile:own-user-profile-detail')
+
+    def dispatch(self, request, *args, **kwargs):
+        recommendation = BookRecommendation.objects.get(id=self.kwargs.get('pk'))
+        if request.user.id != recommendation.user_profile.user.id:
+            return redirect(settings.LOGIN_URL)
+
+        return super(BookRecommendationDeleteView, self).dispatch(request, args, kwargs)
+
+# ------------ REVIEW REPORT -----------
+
+
+@moderators_only
+def review_report_clear(request, **kwargs):
+
+    context = {}
+
+    try:
+        review = BookReview.objects.get(pk=kwargs.get('pk', ''))
+    except BookReview.DoesNotExist:
+        return Http404('Review not found')
+
+    if request.POST:
+        ReviewReport.objects.filter(review=review).delete()
+        return redirect(reverse_lazy('book_functionalities:report-list'))
+
+    context['review'] = review
+
+    return render(request, 'book_functionalities/review_report/clear.html', context)
 
 
 # ------------ SEARCH PAGES ------------
@@ -275,8 +307,35 @@ def book_recommendation_search_view(request):
     return render(request, 'book_functionalities/search_pages/book_recommendation/search.html', context)
 
 
-# --------------- AJAX -----------------
+def book_top_list_view(request):
 
+    context = {}
+    genre_list = BookGenre.objects.all()
+    genre_query = '0'
+    author = ""
+    if request.GET:
+        genre_query = request.GET.get('genre', 0)
+        author = request.GET.get('author', '')
+        context['genre_query'] = genre_query
+        context['author_query'] = author
+
+    result_list = sorted(get_book_toplist(genre_query, author), key=attrgetter('average'), reverse=True)
+    context['results_list'] = result_list
+    context['genre_list'] = genre_list
+
+    return render(request, 'book_functionalities/search_pages/book/top_list.html', context)
+
+
+@moderators_only
+def report_list_view(request):
+    context = {}
+    result_list = sorted(get_report_list(), key=attrgetter('reports'), reverse=True)
+    context['results_list'] = result_list
+
+    return render(request, 'book_functionalities/search_pages/review_report/most_reported_list.html', context)
+
+
+# --------------- AJAX -----------------
 
 @login_required
 def ajax_report_review(request):
@@ -310,5 +369,4 @@ def ajax_report_review(request):
                 'is_success': True
             }
         )
-
 

@@ -51,38 +51,36 @@
         </a>
         <br>
         <p class="float-left align-self-baseline card_datetime">{{ review.creation_datetime }}</p>
+        <article class="float-right mt-n4">
+        {% if user.is_authenticated %}
+            {% if user.id != review.user_profile.user.id %}
+                {% if user.is_superuser or user.is_moderator and not review.user_profile.user.is_superuser %}
+                    {% if review.report_qty > 0 %}
+                        <a href="{% url 'book_functionalities:book-review-report-clear' review.id %}" class="btn btn-primary mr-2">
+                            <i class="fas fa-flag-checkered"></i>
+                        </a>
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+            {% if user.id == review.user_profile.user.id or user.is_superuser or user.is_moderator and not review.user_profile.user.is_superuser %}
 
 
-        {% if user.id == review.user_profile.user.id or user.is_superuser or user.is_moderator and not review.user_profile.user.is_superuser %}
+                    {% if user.id == review.user_profile.user.id %}
+                        <a href="{% url 'book_functionalities:book-review-edit' review.id %}" class="btn btn-warning mr-2">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                    {% endif %}
+                    <a href="{% url 'book_functionalities:book-review-delete' review.id %}" class="btn btn-danger">
+                        <i class="fas fa-eraser"></i>
+                    </a>
 
+                {% else %}
+        </article>
             <article class="float-right mt-n4">
-    {#                {% if review.spoiler %}#}
-    {#                        <a href="#" class="btn mr-2"#}
-    {#                           style="background-color: #533988 !important;">#}
-    {#                            <span style="color: white">Spoiler</span>#}
-    {#                        </a>#}
-    {#                {% endif %}#}
-                <a href="{% url 'book_functionalities:book-review-edit' review.id %}" class="btn btn-warning mr-2">
-                    <i class="fas fa-edit"></i>
-                </a>
-                <a href="{% url 'book_functionalities:book-review-delete' review.id %}" class="btn btn-danger">
-                    <i class="fas fa-eraser"></i>
-                </a>
-            </article>
-
-
-        {% else %}
-            <article class="float-right mt-n4">
-{#                {% if review.spoiler %}#}
-{#                    <a href="#" class="btn mr-2"#}
-{#                       style="background-color: #533988 !important;">#}
-{#                        <span style="color: white">Spoiler</span>#}
-{#                    </a>#}
-{#                {% endif %}#}
-
-                <button id="report_active_{{ review }}"
+            <button id="report_active_{{ review }}"
                             onclick="report('{{ review.id }}')" class="btn btn-danger"><i class="far fa-flag"></i></button>
             </article>
+            {% endif %}
         {% endif %}
     </div>
 {#   FINE FOOTER   #}

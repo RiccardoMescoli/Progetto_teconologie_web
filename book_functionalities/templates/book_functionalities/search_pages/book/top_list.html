@@ -1,0 +1,45 @@
+{% extends 'book_functionalities/search_pages/search_base.html' %}
+{% load static %}
+
+{% block title %}
+    Top list
+{% endblock %}
+
+{% block body_title %}
+    Top list
+{% endblock %}
+
+{% block form_content %}
+    <input class="form-control mr-sm-2" id="author_search"
+           type="search" placeholder="Author name" name="author" aria-label="Search">
+    <select class="custom-select mr-sm-2" id="genre_select" name="genre">
+        <option value="0">All Genres</option>
+        {% for genre in genre_list %}
+            <option value="{{ genre.id }}">{{ genre.name }}</option>
+        {% endfor %}
+    </select>
+    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+{% endblock %}
+
+{% block results_container %}
+    {% if results_list %}
+        {% for book in results_list %}
+            {% include 'book_functionalities/book/top_list_card.html' with book=book position=forloop.counter %}
+        {% endfor %}
+    {% else %}
+        <p class="mt-2"><span style="color: gray; font-size: large">No results found</span></p>
+    {% endif %}
+{% endblock %}
+
+{% block javascript %}
+    <script>
+        document.getElementById("author_search").value = "{{ author_query }}";
+        let select = document.getElementById("genre_select");
+        let i
+        for(i = 0; i < select.options.length; i++){
+            if(select.options[i].value == {{ genre_query }}){
+                select.selectedIndex = i;
+            }
+        }
+    </script>
+{% endblock %}

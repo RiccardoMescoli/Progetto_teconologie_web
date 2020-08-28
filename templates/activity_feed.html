@@ -1,0 +1,91 @@
+{% extends 'base.html' %}#
+{% load static %}
+
+
+{% block title %}Activity feed{% endblock %}
+
+{% block content %}
+    <h1>Followed profiles' activities</h1>
+    <div class="col-md-12 col-12">
+                    <ul id="content_tabs" class="nav nav-tabs">
+                        <li class="nav-item">
+                            <a href="#reviews_pane" class="nav-link active" data-toggle="tab">Reviews</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#recommendations_pane" class="nav-link" data-toggle="tab">Recommendations</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content border-bottom border-left border-right rounded-bottom">
+                        <div id="reviews_pane" role="tabpanel" class="tab-pane active">
+                            <div class="container rounded border-right border-bottom border-left" style="height: 11cm; overflow-y: scroll">
+                                {% if not reviews_list %}
+                                    <p class="mt-2"><span style="color: gray">No reviews to show</span></p>
+                                {% endif %}
+                                {% for review in reviews_list %}
+    {#           REVIEW CARD             #}
+                                    {% include 'book_functionalities/book_review/card.html' with review=review %}
+    {#           REVIEW CARD END           #}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div id="recommendations_pane" role="tabpanel" class="tab-pane">
+                            <div class="container rounded border-right border-bottom border-left" style="height: 11cm; overflow-y: scroll">
+    {#           RECOMMENDATION CARD             #}
+                                {% if not recommendations_list %}
+                                    <p class="mt-2"><span style="color: gray">No recommendations to show</span></p>
+                                {% endif %}
+                                {% for recommendation in recommendations_list %}
+                                    {% include 'book_functionalities/book_recommendation/card.html' with recommendation=recommendation %}
+                                {% endfor %}
+    {#           RECOMMENDATION CARD END             #}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+{#    REPORT(TOAST)     #}
+    {% include 'book_functionalities/report_toasts.html' %}
+        <style>
+         }
+         @media(max-width: 768px) {
+             #content_tabs {
+                 margin-top: 1cm
+             }
+         }
+    </style>
+
+{% endblock %}
+
+{% block javascript %}
+    <script>
+            function report(review_id) {
+            $.ajax({
+                type: 'GET',
+                url: '{% url 'book_functionalities:ajax-report' %}',
+                data: {
+                    'review': review_id,
+                },
+
+                dataType: "json",
+                success: function (data) {
+
+
+                    if (data.is_success) {
+                        $('#report_success').toast('show')
+                    }
+                    else {
+                        if(data.already_reported) {
+                            $('#already_reported').toast('show')
+                        }
+                        else {
+                            $('#report_failed').toast('show')
+                        }
+                    }
+
+                }
+            })
+        }
+    </script>
+{% endblock %}

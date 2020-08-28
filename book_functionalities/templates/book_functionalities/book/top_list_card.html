@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<div class="card my-3" style="overflow-wrap: break-word">
+    <div class="card-header" style="overflow-wrap: break-word">
+    {% if position %}
+        <div class="row align-content-center justify-content-between">
+                <span class="font-weight-bolder font-italic card_text ml-1" style="color: goldenrod">{{ position }}#</span>
+            {% if book.avg_rating %}
+                <article class="float-right card_text mr-1">{{ book.avg_rating }}<i class="fas fa-star" style="color: gold"></i></article>
+            {% else %}
+                <article class="float-right card_text mr-1">?<i class="fas fa-star" style="color: gold"></i></article>
+            {% endif %}
+        </div>
+    {% else %}
+        {% if book.avg_rating %}
+            <article class="float-right card_text mr-1">{{ book.avg_rating }}<i class="fas fa-star" style="color: gold"></i></article>
+        {% else %}
+            <article class="float-right card_text mr-1">?<i class="fas fa-star" style="color: gold"></i></article>
+        {% endif %}
+    {% endif %}
+    </div>
+    <div class="card-body row">
+        <div class="col-md-2 col-3 border-right">
+            <a href="{% url 'book_functionalities:book-detail' book.id %}">
+                <img src="{{ book.displayable_cover }}" class="img-fluid mh-100" alt="base_book_cover">
+            </a>
+        </div>
+        <div class="col-md-10 col-9  card_text">
+            <p>
+                <span class="font-weight-bold">Title:</span><br>
+                <a href="{% url 'book_functionalities:book-detail' book.id %}">
+                    {{ book.title }}
+                </a><br>
+                <span class="font-weight-bold">Author:</span><br>
+                <a href="{% url 'book_functionalities:author-detail' book.author.id %}">
+                    {{ book.author.full_name }}
+                </a><br>
+                <span class="font-weight-bold">Genre:</span><br>
+                    {{ book.genre_name_list|join:', ' }}
+                <br>
+                <span class="font-weight-bold">Reviews:</span><br>
+                    {{ book.ratings_qty }}
+            </p>
+        </div>
+    </div>
+</div>
+
+<style>
+     @media(max-width: 768px) {
+         .card_text {
+             font-size: small;
+         }
+     }
+</style>

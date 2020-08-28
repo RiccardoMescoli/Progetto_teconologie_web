@@ -1,5 +1,7 @@
+from operator import attrgetter
+
 from django.http import JsonResponse
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
@@ -8,6 +10,9 @@ from django.views.generic import CreateView, DetailView, UpdateView
 from user_profile.decorators import no_profile, profile_required
 from user_profile.forms import ExtendedUserCreationForm, UserProfileCreateForm, UserProfileEditForm
 from user_profile.models import UserProfile, UserProfileFollow
+
+from user_profile.search import get_user_profile_queryset
+
 
 # --------- User and Profile ---------
 
@@ -63,6 +68,22 @@ class UserProfileEditView(UpdateView):
             pass
 
         return redirect(reverse('user_profile:own-user-profile-detail'))
+
+
+# ---------- Search pages ----------
+
+def user_profile_search_view(request):
+
+    context = {}
+
+    if request.GET:
+        query = request.GET.get('query')
+        context['query'] = query
+
+        results_list = sorted(get_user_profile_queryset(query), key=attrgetter('user.username'), reverse=False)
+        context['results_list'] = results_list
+
+    return render(request, 'user_profile/search_pages/user_profile/search.html', context)
 
 
 # -------------- Ajax -------------

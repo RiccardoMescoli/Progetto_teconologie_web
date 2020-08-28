@@ -88,14 +88,16 @@ class Book(models.Model):
 
     @property
     def ratings_qty(self):
-        reviews = BookReview.objects.filter(book=self)
-        return len(reviews)
+        return BookReview.objects.filter(book=self).count()
 
     title = models.CharField(max_length=100)
     release_date = models.DateField()
     synopsis = models.TextField()
 
-    genres = models.ManyToManyField(BookGenre)
+    genres = models.ManyToManyField(
+        BookGenre,
+        related_name='genre'
+    )
 
     @property
     def genre_name_list(self):
@@ -153,11 +155,13 @@ class BookReview(models.Model):
 
     user_profile = models.ForeignKey(
         settings.PROFILE_MODEL,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='review'
     )
     book = models.ForeignKey(
         Book,
         on_delete=models.CASCADE,
+        related_name='review',
     )
 
     @property
@@ -168,10 +172,14 @@ class BookReview(models.Model):
             users.append(report['user'].id)
         return users
 
+    @property
+    def report_qty(self):
+        return ReviewReport.objects.filter(review=self).count()
+
     creation_datetime = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['book']
+        ordering = ['book', '-rating']
         verbose_name = 'book review'
         verbose_name_plural = 'book reviews'
         unique_together = ['user_profile', 'book']
@@ -189,6 +197,7 @@ class ReviewReport(models.Model):
     review = models.ForeignKey(
         BookReview,
         on_delete=models.CASCADE,
+        related_name='report'
     )
 
     def __str__(self):
@@ -199,7 +208,8 @@ class BookRecommendation(models.Model):
 
     user_profile = models.ForeignKey(
         settings.PROFILE_MODEL,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='recommendation'
     )
 
     base_book = models.ForeignKey(
