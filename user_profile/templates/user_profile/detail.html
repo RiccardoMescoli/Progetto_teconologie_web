@@ -36,25 +36,26 @@
                         </p>
                         {% if user.is_authenticated %}
                             {% if user.id != object.user.id %}
-                                {% if object in user.profile.followed_list %}
-                                    <div class="row justify-content-center">
-                                        <button id="unfollow_btn" onclick="unfollow()" class="btn btn-outline-danger mb-2">
+                                <div class="row justify-content-center mb-2">
+                                    {% if object in user.profile.followed_list %}
+                                        <button id="unfollow_btn" onclick="unfollow()" class="btn btn-outline-danger">
                                             Unfollow
                                         </button>
-                                        <button id="follow_btn" onclick="follow()" class="btn btn-outline-primary mb-2" style="display: none">
+                                        <button id="follow_btn" onclick="follow()" class="btn btn-outline-primary" style="display: none">
                                             Follow
                                         </button>
-                                    </div>
-                                {% else %}
-                                    <div class="row justify-content-center">
-                                        <button id="unfollow_btn" onclick="unfollow()" class="btn btn-outline-danger mb-2" style="display: none">
+                                    {% else %}
+                                        <button id="unfollow_btn" onclick="unfollow()" class="btn btn-outline-danger" style="display: none">
                                             Unfollow
                                         </button>
-                                        <button id="follow_btn" onclick="follow()" class="btn btn-outline-primary mb-2">
+                                        <button id="follow_btn" onclick="follow()" class="btn btn-outline-primary">
                                             Follow
                                         </button>
-                                    </div>
-                                {% endif %}
+                                    {% endif %}
+                                    <a href="{% url 'user_profile:chat' object.id %}" class="btn btn-outline-primary ml-2">
+                                        <i class="far fa-comment"></i>
+                                    </a>
+                                </div>
                             {% endif %}
                             {% if user.id == object.user.id or user.is_superuser or user.is_moderator and not object.user.is_superuser %}
                                 <div class="row justify-content-center">

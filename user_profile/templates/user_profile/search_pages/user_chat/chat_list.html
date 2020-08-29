@@ -1,0 +1,58 @@
+{% extends 'user_profile/search_pages/list_base.html' %}
+{% load static %}
+
+{% block title %}
+    Chats
+{% endblock %}
+
+{% block body_title %}
+    Chats
+{% endblock %}
+
+{% block results_container %}
+    {% if chatting_with %}
+        {% for profile in chatting_with %}
+            <div class="card my-3" style="overflow-wrap: break-word">
+                <a href="{% url 'user_profile:chat' profile.id %}" class="stretched-link"></a>
+                {#    BODY    #}
+                <div class="card-body row">
+                    <div class="col-md-2 col-6 border-right">
+                            <img src="{{ profile.displayable_propic }}" alt="profile picture"
+                                     class="card-img rounded-circle">
+                    </div>
+                    <div class="col-md-8 col-6 card_text ">
+                        <h3 class="d-none d-md-block">
+                            <span class="font-weight-bold card_text">Chat with:</span>
+                                {{ profile.user.username|truncatechars:30 }}<br>
+                        </h3>
+                        <h4 class="d-block d-md-none">
+                            <span class="font-weight-bold card_text">Chat with:</span>
+                                {{ profile.user.username|truncatechars:30 }}<br>
+                        </h4>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="mt-2"><span style="color: gray; font-size: large">No chats available</span></p>
+    {% endif %}
+
+    <style>
+     @media(max-width: 768px) {
+         .card_text {
+             font-size: small;
+         }
+         .card-img{
+             height: 135px;
+             width: 135px;
+         }
+     }
+     @media(min-width: 768px) {
+
+         .card-img {
+             height: 145px;
+             width: 145px;
+         }
+     }
+    </style>
+{% endblock %}

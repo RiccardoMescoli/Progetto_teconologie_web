@@ -1,6 +1,6 @@
 from operator import attrgetter
 
-from django.http import JsonResponse
+from django.http import HttpResponseNotFound, JsonResponse
 from django.shortcuts import redirect, render
 
 from django.urls import reverse, reverse_lazy
@@ -9,9 +9,11 @@ from django.views.generic import CreateView, DetailView, UpdateView
 
 from user_profile.decorators import no_profile, profile_required
 from user_profile.forms import ExtendedUserCreationForm, UserProfileCreateForm, UserProfileEditForm
-from user_profile.models import UserProfile, UserProfileFollow
+from user_profile.models import ChatMessage, UserProfile, UserProfileFollow
 
 from user_profile.search import get_user_profile_queryset
+
+from django.contrib.humanize.templatetags.humanize import naturaltime
 
 
 # --------- User and Profile ---------
@@ -73,7 +75,6 @@ class UserProfileEditView(UpdateView):
 # ---------- Search pages ----------
 
 def user_profile_search_view(request):
-
     context = {}
 
     if request.GET:
@@ -86,7 +87,64 @@ def user_profile_search_view(request):
     return render(request, 'user_profile/search_pages/user_profile/search.html', context)
 
 
+def user_profile_followed_list_view(request):
+    context = {}
+
+    followed_ids = UserProfileFollow.objects.filter(follower=request.user.profile).values('followed')
+    followed_profiles = UserProfile.objects.filter(id__in=followed_ids)
+
+    results_list = sorted(followed_profiles, key=attrgetter('user.username'), reverse=False)
+    context['results_list'] = results_list
+
+    return render(request, 'user_profile/search_pages/user_profile/followed_list.html', context)
+
+
+# ---------------  ChatMessage -----------------
+
+@profile_required
+def chat_list(request):
+    context = {}
+
+    chatting_with_ids = ChatMessage.objects.filter(sender=request.user.profile).values('receiver').union(
+        ChatMessage.objects.filter(receiver=request.user.profile).values('sender')
+    ).distinct()
+    chatting_with = UserProfile.objects.filter(
+        id__in=chatting_with_ids
+    ).distinct()
+
+    context['chatting_with'] = list(set([profile for profile in chatting_with]))
+
+    return render(request, 'user_profile/search_pages/user_chat/chat_list.html', context)
+
+
+@profile_required
+def chat_main(request, **kwargs):
+    if request.POST:
+        try:
+            receiver = UserProfile.objects.get(id=kwargs.get('pk', None))
+        except UserProfile.DoesNotExist:
+            return HttpResponseNotFound('<h1>Page not found</h1>')
+
+        message = ChatMessage(
+            text=request.POST['message'],
+            sender=request.user.profile,
+            receiver=receiver,
+        )
+        message.save()
+        return redirect(reverse_lazy('user_profile:chat', args=(kwargs.get('pk', None),)))
+
+    else:
+        try:
+            receiver = UserProfile.objects.get(id=kwargs.get('pk', None))
+        except UserProfile.DoesNotExist:
+            return HttpResponseNotFound('<h1>Page not found</h1>')
+
+        context = {'receiver': receiver}
+        return render(request, 'user_chat/chat.html', context)
+
+
 # -------------- Ajax -------------
+
 
 @profile_required
 def ajax_follow_create(request):
@@ -153,3 +211,23 @@ def ajax_follow_delete(request):
     )
 
 
+@profile_required
+def ajax_get_chat_messages(request):
+    receiver = UserProfile.objects.get(id=request.GET.get('receiver', False))
+    messages = ChatMessage.objects.filter(
+        sender=request.user.profile,
+        receiver=receiver
+    ).union(ChatMessage.objects.filter(
+        sender=receiver,
+        receiver=request.user.profile
+    )
+    ).order_by('creation_datetime')
+
+    results = [[
+        message.sender.user.username if len(message.sender.user.username) < 20
+        else message.sender.user.username[:20] + "...",
+        message.text,
+        naturaltime(message.creation_datetime),
+        message.sender.user == request.user] for message in messages]
+
+    return JsonResponse(results, safe=False)

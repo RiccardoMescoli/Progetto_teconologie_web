@@ -32,6 +32,10 @@
                 <span class="font-weight-bold">Title:</span><br>
                 <a href="{% url 'book_functionalities:book-detail' recommendation.base_book.id %}">
                             {{ recommendation.base_book.title }}
+                </a><br>
+                <span class="font-weight-bold">Author:</span><br>
+                <a href="{% url 'book_functionalities:author-detail' recommendation.base_book.author.id %}">
+                            {{ recommendation.base_book.author.full_name }}
                 </a>
             </p>
         </div>
@@ -40,6 +44,10 @@
                 <span class="font-weight-bold">Title:</span><br>
                 <a href="{% url 'book_functionalities:book-detail' recommendation.recommended_book.id %}">
                             {{ recommendation.recommended_book.title }}
+                </a><br>
+                <span class="font-weight-bold">Author:</span><br>
+                <a href="{% url 'book_functionalities:author-detail' recommendation.recommended_book.author.id %}">
+                            {{ recommendation.recommended_book.author.full_name }}
                 </a>
             </p>
         </div>

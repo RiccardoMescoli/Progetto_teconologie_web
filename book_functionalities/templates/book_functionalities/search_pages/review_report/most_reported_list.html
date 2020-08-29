@@ -12,7 +12,7 @@
 {% block results_container %}
     {% if results_list %}
         {% for review in results_list %}
-            {% include 'book_functionalities/book_review/card.html' with review=review %}
+            {% include 'book_functionalities/book_review/card.html' with review=review clear=True %}
         {% endfor %}
     {% else %}
         <p class="mt-2"><span style="color: gray; font-size: large">No reports found</span></p>

@@ -1,6 +1,6 @@
 from operator import attrgetter
 
-from django.db.models import Count
+from django.db.models import Avg, Count, FloatField
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -55,19 +55,22 @@ def personalized_recommendations_view(request):
 
     user_reviewed_books = BookReview.objects.filter(user_profile=user_profile).values_list('book', flat=True)
 
-    recommendations = BookRecommendation.objects.filter(
+    book_scores = BookRecommendation.objects.filter(
         user_profile__in=followed_profiles,
-        base_book_id__in=user_reviewed_books,
+        base_book__in=user_reviewed_books,
     ).exclude(
-        recommended_book_id__in=user_reviewed_books
-    ).values('recommended_book__id').annotate(
-        recommendations=Count('user_profile_id', distinct=True)
-    ).order_by('-recommendations')[:10]
+        recommended_book__in=user_reviewed_books
+     ).select_related('recommended_book').filter(
+        recommended_book__review__user_profile__in=followed_profiles
+    ).values('recommended_book').annotate(
+        score=Count('user_profile', distinct=True, output_field=FloatField()) * (Avg(
+            'recommended_book__review__rating', output_field=FloatField())**2)
+    ).order_by('-score')[:10].values_list('recommended_book', flat=True)
 
-    books = Book.objects.filter(id__in=[recommendation['recommended_book__id'] for recommendation in recommendations])
+    books = Book.objects.filter(id__in=book_scores)
 
     recommended_books_list = list(set([book for book in books]))
 
-    context['results_list'] = recommended_books_list
+    context['results_list'] = sorted(recommended_books_list, key=lambda x: x.avg_rating, reverse=True)
 
     return render(request, 'personalized_recommendations.html', context)

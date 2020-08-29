@@ -137,3 +137,12 @@ class UserProfileFollow(models.Model):
 
     def __str__(self):
         return f'{self.follower.user.username} follows {self.followed.user.username}'
+
+
+class ChatMessage(models.Model):
+    text = models.TextField()
+    sender = models.ForeignKey(settings.PROFILE_MODEL, on_delete=models.CASCADE, related_name='sended_messages')
+    receiver = models.ForeignKey(settings.PROFILE_MODEL, on_delete=models.CASCADE, related_name='received_messages')
+
+    creation_datetime = models.DateTimeField(auto_now_add=True)
+

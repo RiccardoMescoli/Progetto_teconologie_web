@@ -34,6 +34,7 @@
         <option value="$MODULE_DIR$/templates" />
         <option value="$MODULE_DIR$/user_profile/templates" />
         <option value="$MODULE_DIR$/book_functionalities/templates" />
+        <option value="$MODULE_DIR$/book_chat/templates" />
       </list>
     </option>
   </component>
