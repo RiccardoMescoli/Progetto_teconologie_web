@@ -154,4 +154,3 @@ LOGIN_URL = '/user/login'
 PROFILE_CREATION_URL = '/user_profile/create'
 
 LOGIN_REDIRECT_URL = 'homepage'
-

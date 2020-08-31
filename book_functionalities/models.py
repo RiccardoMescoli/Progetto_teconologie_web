@@ -1,10 +1,35 @@
 import os
+from datetime import date, datetime
+
 from statistics import mean
 
-from django.core.validators import MaxValueValidator
+from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.utils import timezone
+from django.utils.translation import ugettext_lazy as _
 
 from book import settings
+
+
+def no_future_dates_validator(value):
+    if isinstance(value, datetime):
+        if value >= timezone.now():
+            raise ValidationError(
+                _("The date entered must be lesser than today.")
+            )
+    if isinstance(value, date):
+        if value >= date.today():
+            raise ValidationError(
+                _("The date can't be set in the future")
+            )
+    else:
+        raise ValidationError(
+            _("The value entered isn't a valid type of date or datetime.")
+        )
+
+
+date_is_past = no_future_dates_validator
 
 
 class Author(models.Model):
@@ -21,6 +46,9 @@ class Author(models.Model):
     full_name = models.CharField(max_length=100)
     birth_date = models.DateField()
     biography = models.TextField()
+
+    def clean(self):
+        date_is_past(self.birth_date)
 
     class Meta:
         ordering = ['full_name']
@@ -99,6 +127,9 @@ class Book(models.Model):
         related_name='genre'
     )
 
+    def clean(self):
+        date_is_past(self.release_date)
+
     @property
     def genre_name_list(self):
         elements = self.genres.all().values('name')
@@ -150,7 +181,9 @@ class BookReview(models.Model):
     # spoiler = models.BooleanField(default=False)
     content = models.CharField(max_length=500)
     rating = models.PositiveSmallIntegerField(
-        validators=[MaxValueValidator(10, message="The rating can't be higher than 10"), ]
+        validators=[
+            MaxValueValidator(10, message="The rating can't be higher than 10"),
+            MinValueValidator(1, message="The rating can't be lower than 1")]
     )
 
     user_profile = models.ForeignKey(

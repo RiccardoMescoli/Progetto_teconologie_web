@@ -314,13 +314,13 @@ def book_top_list_view(request):
     genre_query = '0'
     author = ""
     if request.GET:
-        genre_query = request.GET.get('genre', 0)
+        genre_query = request.GET.get('genre', '0')
         author = request.GET.get('author', '')
         context['genre_query'] = genre_query
         context['author_query'] = author
 
-    result_list = sorted(get_book_toplist(genre_query, author), key=attrgetter('average'), reverse=True)
-    context['results_list'] = result_list
+    results_list = sorted(get_book_toplist(genre_query, author), key=attrgetter('average'), reverse=True)
+    context['results_list'] = results_list
     context['genre_list'] = genre_list
 
     return render(request, 'book_functionalities/search_pages/book/top_list.html', context)

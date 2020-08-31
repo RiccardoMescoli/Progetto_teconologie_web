@@ -53,7 +53,7 @@ def get_book_recommendation_queryset(title="", author=""):
     return queryset
 
 
-def get_book_toplist(genre_query, author):
+def get_book_toplist(genre_query='0', author=""):
 
     books = []
     author_query = author.rstrip().lstrip()
@@ -62,19 +62,19 @@ def get_book_toplist(genre_query, author):
         if genre_query != '0':
             books = Book.objects.filter(
                 Q(author__full_name__icontains=author_query) & Q(genres__in=BookGenre.objects.filter(id=genre_query))
-            ).annotate(average=Avg('review__rating')).order_by('-average')[:100]
+            ).annotate(average=Avg('review__rating')).exclude(average=None).order_by('-average')[:10]
         else:
             books = Book.objects.filter(
                 Q(author__full_name__icontains=author_query)
-            ).annotate(average=Avg('review__rating')).order_by('-average')[:100]
+            ).annotate(average=Avg('review__rating')).exclude(average=None).order_by('-average')[:10]
 
     elif genre_query != '0':
         books = Book.objects.filter(
             Q(genres__in=BookGenre.objects.filter(id=genre_query))
-        ).annotate(average=Avg('review__rating')).order_by('-average')[:100]
+        ).annotate(average=Avg('review__rating')).exclude(average=None).order_by('-average')[:10]
 
     else:
-        books = Book.objects.annotate(average=Avg('review__rating')).exclude(average=None).order_by('-average')[:100]
+        books = Book.objects.annotate(average=Avg('review__rating')).exclude(average=None).order_by('-average')[:10]
 
     queryset = list(set([book for book in books]))
     return queryset

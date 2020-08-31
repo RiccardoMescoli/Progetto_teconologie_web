@@ -99,9 +99,13 @@ class UserProfile(models.Model):
         return super(UserProfile, self).save(*args, **kwargs)
 
     def delete(self, using=None, keep_parents=False):
-        profile_pic_path = settings.MEDIA_ROOT + '/' + self.profile_picture.name
         res = super(UserProfile, self).delete(using, keep_parents)
-        os.remove(profile_pic_path)
+        if self.profile_picture.name != "":
+            profile_pic_path = settings.MEDIA_ROOT + '/' + self.profile_picture.name
+        try:
+            os.remove(profile_pic_path)
+        except UnboundLocalError:
+            pass
         return res
 
 
@@ -145,4 +149,8 @@ class ChatMessage(models.Model):
     receiver = models.ForeignKey(settings.PROFILE_MODEL, on_delete=models.CASCADE, related_name='received_messages')
 
     creation_datetime = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'message from {self.sender.user.username} for {self.receiver.user.username}' \
+               f' sent at {self.creation_datetime}'
 
