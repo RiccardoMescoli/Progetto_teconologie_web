@@ -311,10 +311,10 @@ def book_top_list_view(request):
 
     context = {}
     genre_list = BookGenre.objects.all()
-    genre_query = '0'
+    genre_query = 0
     author = ""
     if request.GET:
-        genre_query = request.GET.get('genre', '0')
+        genre_query = request.GET.get('genre', 0)
         author = request.GET.get('author', '')
         context['genre_query'] = genre_query
         context['author_query'] = author

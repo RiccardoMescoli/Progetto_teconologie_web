@@ -1,4 +1,4 @@
-from django.test import Client, TestCase
+from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
@@ -230,6 +230,115 @@ class testTopList(TestCase):
         reviewed_book1.delete()
         book_without_reviews2.delete()
         review1.delete()
+
+    def test_no_results_incorrect_data(self):
+        book1 = create_book(self.author1, self.book_genre1)
+        book2 = create_book(self.author1, self.book_genre2)
+        book3 = create_book(self.author2, self.book_genre1)
+        book4 = create_book(self.author2, self.book_genre2)
+
+        book1_review1 = create_review(book1, self.profile_user1, 10)
+        book1_review2 = create_review(book1, self.profile_user2, 10)
+
+        book2_review1 = create_review(book2, self.profile_user1, 10)
+        book2_review2 = create_review(book2, self.profile_user2, 9)
+
+        book3_review1 = create_review(book3, self.profile_user1, 9)
+        book3_review2 = create_review(book3, self.profile_user2, 9)
+
+        book4_review1 = create_review(book4, self.profile_user1, 9)
+        book4_review2 = create_review(book4, self.profile_user2, 8)
+
+        # No results check with non existent genre id
+        response = self.client.get(reverse("book_functionalities:book-top-list"),
+                                   {'genre': self.book_genre3.id+self.book_genre2.id+self.book_genre1.id})
+        self.check_no_results(response)
+
+        # No results check with genre id of wrong type (not convertible to an existing id)
+        response = self.client.get(reverse("book_functionalities:book-top-list"),
+                                   {'genre': "a string"})
+        self.check_no_results(response)
+
+        response = self.client.get(reverse("book_functionalities:book-top-list"),
+                                   {'genre': 1.5})
+        self.check_no_results(response)
+
+        response = self.client.get(reverse("book_functionalities:book-top-list"),
+                                   {'genre': object()})
+        self.check_no_results(response)
+
+        # No results check with non existent author
+        response = self.client.get(reverse("book_functionalities:book-top-list"),
+                                   {'author': self.author1.full_name+"abcd"*5})
+        self.check_no_results(response)
+
+        # No results check with author of wrong type (not convertible to an existing author name nor contained in one)
+        response = self.client.get(reverse("book_functionalities:book-top-list"),
+                                   {'author': 17})
+        self.check_no_results(response)
+
+        response = self.client.get(reverse("book_functionalities:book-top-list"),
+                                   {'author': 1.5})
+        self.check_no_results(response)
+
+        response = self.client.get(reverse("book_functionalities:book-top-list"),
+                                   {'author': object()})
+        self.check_no_results(response)
+
+        # No results check with mixed correct and wrong parameters
+        response = self.client.get(reverse("book_functionalities:book-top-list"),
+                                   {'author': 17, 'genre': self.book_genre1.id})
+        self.check_no_results(response)
+
+        response = self.client.get(reverse("book_functionalities:book-top-list"),
+                                   {'author': 1.5, 'genre': self.book_genre1.id})
+        self.check_no_results(response)
+
+        response = self.client.get(reverse("book_functionalities:book-top-list"),
+                                   {'author': object(), 'genre': self.book_genre1.id})
+        self.check_no_results(response)
+
+        response = self.client.get(reverse("book_functionalities:book-top-list"),
+                                   {'genre': "a string", 'author': self.author1.full_name})
+        self.check_no_results(response)
+
+        response = self.client.get(reverse("book_functionalities:book-top-list"),
+                                   {'genre': 1.5, 'author': self.author1.full_name})
+        self.check_no_results(response)
+
+        response = self.client.get(reverse("book_functionalities:book-top-list"),
+                                   {'genre': object(), 'author': self.author1.full_name})
+        self.check_no_results(response)
+
+        # No results check with wrong parameters only
+        response = self.client.get(reverse("book_functionalities:book-top-list"),
+                                   {'author': 17, 'genre': "a string"})
+        self.check_no_results(response)
+
+        response = self.client.get(reverse("book_functionalities:book-top-list"),
+                                   {'author': 1.5, 'genre': 1.5})
+        self.check_no_results(response)
+
+        response = self.client.get(reverse("book_functionalities:book-top-list"),
+                                   {'author': object(), 'genre': object()})
+        self.check_no_results(response)
+
+        book1.delete()
+        book2.delete()
+        book3.delete()
+        book4.delete()
+
+        book1_review1.delete()
+        book1_review2.delete()
+
+        book2_review1.delete()
+        book2_review2.delete()
+
+        book3_review1.delete()
+        book3_review2.delete()
+
+        book4_review1.delete()
+        book4_review2.delete()
 
     def test_results_with_filtering(self):
         book1 = create_book(self.author1, self.book_genre1)

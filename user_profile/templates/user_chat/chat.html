@@ -55,12 +55,12 @@
                         for (i = 0; i < rows.length; i++){
                             let arow = rows[i];
                             if (arow[3]) {
-                                $('#chatcontent').append("<div class='container rounded border w-75 float-right my-1' " +
+                                $('#chatcontent').append("<div class='container-fluid rounded border w-75 float-right my-1' " +
                                     "style='background-color: #e9f1f5; overflow-wrap: break-word'>" +
                                     "<span class='font-weight-bold'>" + 'me' + "</span><br>" + arow[1] +"<br>" +
                                     "<span class='font-italic' style='font-size: small'>" + arow[2] + "</span></div>");
                             } else {
-                                $('#chatcontent').append("<div class='container rounded border w-75 float-left my-1'" +
+                                $('#chatcontent').append("<div class='container-fluid rounded border w-75 float-left my-1'" +
                                     "style='overflow-wrap: break-word;'><span class='font-weight-bold'> " +
                                     arow[0] + "</span><br>" + arow[1] + "<br><span class='font-italic' style='font-size: small'>"
                                     + arow[2] + "</span></div>");
