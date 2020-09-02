@@ -1,5 +1,6 @@
 from django.db.models import Avg, Count, Q
 
+from book import settings
 from book_functionalities.models import Book, BookGenre, BookRecommendation, BookReview
 
 
@@ -57,6 +58,10 @@ def get_book_toplist(genre=0, author=""):
 
     books = []
     try:
+        min_reviews_amount = settings.MIN_AMOUNT_REVIEWS_TOPLIST
+    except AttributeError:
+        min_reviews_amount = 1
+    try:
         genre_query = int(genre)
     except ValueError:
         return []
@@ -69,19 +74,28 @@ def get_book_toplist(genre=0, author=""):
         if genre_query != 0:
             books = Book.objects.filter(
                 Q(author__full_name__icontains=author_query) & Q(genres__in=BookGenre.objects.filter(id=genre_query))
-            ).annotate(average=Avg('review__rating')).exclude(average=None).order_by('-average')[:10]
+            ).annotate(average=Avg('review__rating')).annotate(
+                reviews_amount=Count("review")
+            ).exclude(reviews_amount__lt=min_reviews_amount).order_by('-average')[:10]
         else:
             books = Book.objects.filter(
                 Q(author__full_name__icontains=author_query)
-            ).annotate(average=Avg('review__rating')).exclude(average=None).order_by('-average')[:10]
-
+            ).annotate(average=Avg('review__rating')).annotate(
+                reviews_amount=Count("review")
+            ).exclude(reviews_amount__lt=min_reviews_amount).order_by('-average')[:10]
     elif genre_query != 0:
         books = Book.objects.filter(
             Q(genres__in=BookGenre.objects.filter(id=genre_query))
-        ).annotate(average=Avg('review__rating')).exclude(average=None).order_by('-average')[:10]
+        ).annotate(average=Avg('review__rating')).annotate(
+            reviews_amount=Count("review")
+        ).exclude(reviews_amount__lt=min_reviews_amount).order_by('-average')[:10]
 
     else:
-        books = Book.objects.annotate(average=Avg('review__rating')).exclude(average=None).order_by('-average')[:10]
+        books = Book.objects.annotate(
+            average=Avg('review__rating')
+        ).annotate(
+            reviews_amount=Count("review")
+        ).exclude(reviews_amount__lt=min_reviews_amount).order_by('-average')[:10]
 
     queryset = list(set([book for book in books]))
     return queryset

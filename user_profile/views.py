@@ -51,7 +51,6 @@ def own_user_profile_detail_view(request):
     return redirect('user_profile:user-profile-detail', pk=request.user.profile.id)
 
 
-@method_decorator(profile_required, name='dispatch')
 class UserProfileEditView(UpdateView):
     model = UserProfile
     form_class = UserProfileEditForm
@@ -86,7 +85,7 @@ def user_profile_search_view(request):
 
     return render(request, 'user_profile/search_pages/user_profile/search.html', context)
 
-
+@profile_required
 def user_profile_followed_list_view(request):
     context = {}
 
@@ -139,8 +138,38 @@ def chat_main(request, **kwargs):
         except UserProfile.DoesNotExist:
             return HttpResponseNotFound('<h1>Page not found</h1>')
 
-        context = {'receiver': receiver}
+        delete_button = kwargs.get('delete_button', False)
+
+        if ChatMessage.objects.filter(sender=request.user.profile, receiver=receiver).union(
+                ChatMessage.objects.filter(sender=receiver, receiver=request.user.profile)
+        ).distinct().exists():
+            delete_button = True
+
+        context = {'receiver': receiver, 'delete_button': delete_button}
         return render(request, 'user_chat/chat.html', context)
+
+
+@profile_required
+def delete_chat(request, **kwargs):
+    if request.POST:
+        try:
+            receiver = UserProfile.objects.get(id=kwargs.get('pk', None))
+        except UserProfile.DoesNotExist:
+            return HttpResponseNotFound('<h1>Page not found</h1>')
+
+        ChatMessage.objects.filter(sender=request.user.profile, receiver=receiver).delete()
+        ChatMessage.objects.filter(sender=receiver, receiver=request.user.profile).delete()
+
+        return redirect(reverse("user_profile:chat-list"))
+
+    else:
+        try:
+            receiver = UserProfile.objects.get(id=kwargs.get('pk', None))
+        except UserProfile.DoesNotExist:
+            return HttpResponseNotFound('<h1>Page not found</h1>')
+
+        context = {'receiver': receiver}
+        return render(request, 'user_chat/delete.html', context)
 
 
 # -------------- Ajax -------------

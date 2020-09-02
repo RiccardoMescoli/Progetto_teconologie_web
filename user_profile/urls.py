@@ -16,6 +16,7 @@ urlpatterns = [
 
     path('followed_list', views.user_profile_followed_list_view, name='followed-list'),
     path('<int:pk>/chat', views.chat_main, name='chat'),
+    path('<int:pk>/chat/delete', views.delete_chat, name='chat-delete'),
     path('chat_list', views.chat_list, name='chat-list'),
 
     path('ajax/follow', views.ajax_follow_create, name='ajax-follow'),

@@ -178,8 +178,7 @@ class Book(models.Model):
 
 class BookReview(models.Model):
 
-    # spoiler = models.BooleanField(default=False)
-    content = models.CharField(max_length=500)
+    content = models.CharField(max_length=500, blank=True)
     rating = models.PositiveSmallIntegerField(
         validators=[
             MaxValueValidator(10, message="The rating can't be higher than 10"),

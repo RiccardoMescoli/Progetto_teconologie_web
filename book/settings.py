@@ -154,3 +154,5 @@ LOGIN_URL = '/user/login'
 PROFILE_CREATION_URL = '/user_profile/create'
 
 LOGIN_REDIRECT_URL = 'homepage'
+
+MIN_AMOUNT_REVIEWS_TOPLIST = 2
