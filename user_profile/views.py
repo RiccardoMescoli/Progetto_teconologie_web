@@ -118,35 +118,20 @@ def chat_list(request):
 
 @profile_required
 def chat_main(request, **kwargs):
-    if request.POST:
-        try:
-            receiver = UserProfile.objects.get(id=kwargs.get('pk', None))
-        except UserProfile.DoesNotExist:
-            return HttpResponseNotFound('<h1>Page not found</h1>')
+    try:
+        receiver = UserProfile.objects.get(id=kwargs.get('pk', None))
+    except UserProfile.DoesNotExist:
+        return HttpResponseNotFound('<h1>Page not found</h1>')
 
-        message = ChatMessage(
-            text=request.POST['message'],
-            sender=request.user.profile,
-            receiver=receiver,
-        )
-        message.save()
-        return redirect(reverse_lazy('user_profile:chat', args=(kwargs.get('pk', None),)))
+    delete_button = kwargs.get('delete_button', False)
 
-    else:
-        try:
-            receiver = UserProfile.objects.get(id=kwargs.get('pk', None))
-        except UserProfile.DoesNotExist:
-            return HttpResponseNotFound('<h1>Page not found</h1>')
+    if ChatMessage.objects.filter(sender=request.user.profile, receiver=receiver).union(
+            ChatMessage.objects.filter(sender=receiver, receiver=request.user.profile)
+    ).distinct().exists():
+        delete_button = True
 
-        delete_button = kwargs.get('delete_button', False)
-
-        if ChatMessage.objects.filter(sender=request.user.profile, receiver=receiver).union(
-                ChatMessage.objects.filter(sender=receiver, receiver=request.user.profile)
-        ).distinct().exists():
-            delete_button = True
-
-        context = {'receiver': receiver, 'delete_button': delete_button}
-        return render(request, 'user_chat/chat.html', context)
+    context = {'receiver': receiver, 'delete_button': delete_button}
+    return render(request, 'user_chat/chat.html', context)
 
 
 @profile_required
@@ -260,3 +245,19 @@ def ajax_get_chat_messages(request):
         message.sender.user == request.user] for message in messages]
 
     return JsonResponse(results, safe=False)
+
+
+@profile_required
+def ajax_send_message(request, **kwargs):
+    try:
+        receiver = UserProfile.objects.get(id=kwargs.get('pk', None))
+    except UserProfile.DoesNotExist:
+        return HttpResponseNotFound('<h1>Page not found</h1>')
+
+    message = ChatMessage(
+        text=request.GET['message'],
+        sender=request.user.profile,
+        receiver=receiver,
+    )
+    message.save()
+    return JsonResponse({})

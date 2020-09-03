@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
+from book import settings
 from book_functionalities.models import Author, Book, BookGenre, BookReview
 from user_profile.models import ExtendedUser, UserProfile
 
@@ -299,11 +300,19 @@ class testTopList(TestCase):
         self.check_no_results(response)
 
         response = self.client.get(reverse("book_functionalities:book-top-list"),
+                                   {'author': self.author3.full_name, 'genre': self.book_genre1.id})
+        self.check_no_results(response)
+
+        response = self.client.get(reverse("book_functionalities:book-top-list"),
                                    {'genre': "a string", 'author': self.author1.full_name})
         self.check_no_results(response)
 
         response = self.client.get(reverse("book_functionalities:book-top-list"),
                                    {'genre': 1.5, 'author': self.author1.full_name})
+        self.check_no_results(response)
+
+        response = self.client.get(reverse("book_functionalities:book-top-list"),
+                                   {'genre': self.book_genre3.id, 'author': self.author1.full_name})
         self.check_no_results(response)
 
         response = self.client.get(reverse("book_functionalities:book-top-list"),
@@ -321,6 +330,10 @@ class testTopList(TestCase):
 
         response = self.client.get(reverse("book_functionalities:book-top-list"),
                                    {'author': object(), 'genre': object()})
+        self.check_no_results(response)
+
+        response = self.client.get(reverse("book_functionalities:book-top-list"),
+                                   {'author': self.author3.full_name, 'genre': self.book_genre3.id})
         self.check_no_results(response)
 
         book1.delete()
@@ -367,6 +380,8 @@ class testTopList(TestCase):
         book6_review2 = create_review(book6, self.profile_user2, 7)
 
         # results with no filtering
+        old_value = settings.MIN_AMOUNT_REVIEWS_TOPLIST
+        settings.MIN_AMOUNT_REVIEWS_TOPLIST = 1
         response = self.client.get(reverse("book_functionalities:book-top-list"))
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, "No results found")
@@ -382,7 +397,6 @@ class testTopList(TestCase):
         self.assertNotContains(response, "No results found")
         self.assertNotEqual(response.context['results_list'], [])
         self.assertEqual(response.context['results_list'], [book1, book2, book3, book4, book5, book6])
-
 
         # results with filtering on genre
         response = self.client.get(reverse("book_functionalities:book-top-list"), {'genre': self.book_genre1.id})
@@ -408,7 +422,7 @@ class testTopList(TestCase):
         self.assertNotEqual(response.context['results_list'], [])
         self.assertEqual(response.context['results_list'], [book1, book5])
 
-        # result with filtering on list length (the view should return 10 results at most)
+        # results with filtering on list length (the view should return 10 results at most)
         book7 = create_book(self.author1, self.book_genre1.id)
         book8 = create_book(self.author1, self.book_genre1.id)
         book9 = create_book(self.author1, self.book_genre1.id)
@@ -431,6 +445,18 @@ class testTopList(TestCase):
                          [book1, book2, book3, book4, book5, book6, book7, book8, book9, book10]
                          )
 
+        # results with minimum amount of reviews to be included in the evaluation > 1
+        settings.MIN_AMOUNT_REVIEWS_TOPLIST = 2
+
+        response = self.client.get(reverse("book_functionalities:book-top-list"))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "No results found")
+        self.assertNotEqual(response.context['results_list'], [])
+        self.assertEqual(response.context['results_list'],
+                         [book1, book2, book3, book4, book5, book6]
+                         )
+
+        settings.MIN_AMOUNT_REVIEWS_TOPLIST = old_value
         # deletion of the data
         book1.delete()
         book2.delete()

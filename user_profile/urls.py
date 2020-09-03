@@ -21,5 +21,6 @@ urlpatterns = [
 
     path('ajax/follow', views.ajax_follow_create, name='ajax-follow'),
     path('ajax/unfollow', views.ajax_follow_delete, name='ajax-unfollow'),
-    path('ajax/get_messages', views.ajax_get_chat_messages, name='get-messages')
+    path('ajax/get_messages', views.ajax_get_chat_messages, name='get-messages'),
+    path('ajax/<int:pk>/send_message', views.ajax_send_message, name='send-message')
 ]

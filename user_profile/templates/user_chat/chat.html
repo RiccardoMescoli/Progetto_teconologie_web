@@ -9,12 +9,19 @@
 {% block content %}
         <article>
         <nav class="navbar navbar-expand-lg navbar-light bg-light border rounded-top" style="overflow-wrap: break-word">
-            <a class="navbar-brand my-n3" href="{% url 'user_profile:user-profile-detail' receiver.id %}">
+            <a class="navbar-brand my-n3 float-left" href="{% url 'user_profile:user-profile-detail' receiver.id %}">
                 <img class="image-fluid rounded-circle" src="{{ receiver.displayable_propic }}" alt="propic" style="height: 40px; width: 40px">
             </a>
             <h4><span class="font-italic font-weight-light my-auto mr-auto card-text">{{ receiver.user.username|truncatechars:30}}</span></h4>
             {% if delete_button %}
                 <a class="btn btn-danger float-right ml-auto" href="{% url "user_profile:chat-delete" receiver.id%}"><i class="fas fa-trash-alt"></i></a>
+            {% else %}
+                <div class="ml-auto">
+                    <a id="delete_btn" class="btn btn-danger float-right ml-auto" href="{% url "user_profile:chat-delete" receiver.id%}"
+                    style="display: none">
+                        <i class="fas fa-trash-alt"></i>
+                    </a>
+                </div>
             {% endif %}
         </nav>
         <div id="chatcontent" class="container rounded-bottom border-right border-bottom border-left"
@@ -22,10 +29,10 @@
 
         </div>
         <nav class="navbar navbar-expand-lg navbar-light bg-light border rounded-bottom">
-            <form class="form-inline my-2 my-lg-0 ml-auto" method="post">
+            <form id="message_form" class="form-inline my-2 my-lg-0 ml-auto" method="post">
                 {% csrf_token %}
                 <input id="message_bar" class="mr-2" type="text" name="message">
-                <button class="btn btn-outline-primary my-2 my-sm-0 float-right" type="submit">Send</button>
+                <button class="btn btn-outline-primary my-2 my-sm-0 float-right" name="submit" type="submit">Send</button>
             </form>
         </nav>
     </article>
@@ -51,32 +58,57 @@
 
 {% block javascript %}
     <script>
-        function updateMsg(len){
+
+        $('#message_form').on('submit', function(event){
+            event.preventDefault();
+            ajax_send_msg();
+        });
+
+        function ajax_send_msg() {
+            $.ajax({
+                type: 'GET',
+                url: '{% url 'user_profile:send-message' receiver.id %}',
+                data: {
+                    'message': $('#message_bar').val()
+                },
+
+                dataType: "json",
+                success: function () {
+                        $('#message_bar').val('');
+                        document.getElementById('delete_btn').style.display = 'block';
+                        updateMsg(0, false);
+                    }
+            })
+        }
+        
+        function updateMsg(len, repeat){
             $.getJSON(
                 '{% url 'user_profile:get-messages' %}',
                 {'receiver': '{{ receiver.id }}' },
                 function (rows) {
-                    $('#chatcontent').empty();
                         let i;
                         let new_len = rows.length;
-                        for (i = 0; i < rows.length; i++){
-                            let arow = rows[i];
-                            if (arow[3]) {
-                                $('#chatcontent').append("<div class='container-fluid rounded border w-75 float-right my-1' " +
-                                    "style='background-color: #e9f1f5; overflow-wrap: break-word'>" +
-                                    "<span class='font-weight-bold'>" + 'me' + "</span><br>" + arow[1] +"<br>" +
-                                    "<span class='font-italic' style='font-size: small'>" + arow[2] + "</span></div>");
-                            } else {
-                                $('#chatcontent').append("<div class='container-fluid rounded border w-75 float-left my-1'" +
-                                    "style='overflow-wrap: break-word;'><span class='font-weight-bold'> " +
-                                    arow[0] + "</span><br>" + arow[1] + "<br><span class='font-italic' style='font-size: small'>"
-                                    + arow[2] + "</span></div>");
-                            }
-                        }
                         if(new_len > len){
+                            $('#chatcontent').empty();
+                            for (i = 0; i < rows.length; i++){
+                                let arow = rows[i];
+                                if (arow[3]) {
+                                    $('#chatcontent').append("<div class='container-fluid rounded border w-75 float-right my-1' " +
+                                        "style='background-color: #e9f1f5; overflow-wrap: break-word'>" +
+                                        "<span class='font-weight-bold'>" + 'me' + "</span><br>" + arow[1] +"<br>" +
+                                        "<span class='font-italic' style='font-size: small'>" + arow[2] + "</span></div>");
+                                } else {
+                                    $('#chatcontent').append("<div class='container-fluid rounded border w-75 float-left my-1'" +
+                                        "style='overflow-wrap: break-word;'><span class='font-weight-bold'> " +
+                                        arow[0] + "</span><br>" + arow[1] + "<br><span class='font-italic' style='font-size: small'>"
+                                        + arow[2] + "</span></div>");
+                                }
+                            }
                             scrollBottom();
                         }
-                        setTimeout(function (){updateMsg(new_len);}, 2000);
+                        if(repeat){
+                            setTimeout(function (){updateMsg(new_len, true);}, 1000);
+                        }
                 });
         }
 
@@ -86,7 +118,7 @@
 
         $(document).ready(function () {
                 $.ajaxSetup({ cache: false });
-                updateMsg(0);
+                updateMsg(0, true);
         });
     </script>
 {% endblock %}
