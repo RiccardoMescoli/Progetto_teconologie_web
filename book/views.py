@@ -55,22 +55,24 @@ def personalized_recommendations_view(request):
 
     user_reviewed_books = BookReview.objects.filter(user_profile=user_profile).values_list('book', flat=True)
 
-    book_scores = BookRecommendation.objects.filter(
-        user_profile__in=followed_profiles,
-        base_book__in=user_reviewed_books,
-    ).exclude(
-        recommended_book__in=user_reviewed_books
-     ).select_related('recommended_book').filter(
-        recommended_book__review__user_profile__in=followed_profiles
-    ).values('recommended_book').annotate(
-        score=Count('user_profile', distinct=True, output_field=FloatField()) * (Avg(
-            'recommended_book__review__rating', output_field=FloatField())**2)
-    ).order_by('-score')[:10].values_list('recommended_book', flat=True)
+    if len(user_reviewed_books) > 0 and len(followed_profiles) > 0:
+        book_scores = BookRecommendation.objects.filter(
+            user_profile__in=followed_profiles,
+            base_book__in=user_reviewed_books,
+        ).exclude(
+            recommended_book__in=user_reviewed_books
+         ).select_related('recommended_book').filter(
+            recommended_book__review__user_profile__in=followed_profiles
+        ).values('recommended_book').annotate(
+            score=Count('user_profile', distinct=True, output_field=FloatField()) * (Avg(
+                'recommended_book__review__rating', output_field=FloatField())**2)
+        ).order_by('-score')[:10].values_list('recommended_book', flat=True)
 
-    books = Book.objects.filter(id__in=book_scores)
+        books = Book.objects.filter(id__in=book_scores)
 
-    recommended_books_list = list(set([book for book in books]))
-
-    context['results_list'] = sorted(recommended_books_list, key=lambda x: x.avg_rating, reverse=True)
+        recommended_books_list = list(set([book for book in books]))
+        context['results_list'] = sorted(recommended_books_list, key=lambda x: x.avg_rating, reverse=True)
+    else:
+        context['results_list'] = []
 
     return render(request, 'personalized_recommendations.html', context)
