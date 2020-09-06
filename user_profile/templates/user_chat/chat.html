@@ -65,20 +65,22 @@
         });
 
         function ajax_send_msg() {
-            $.ajax({
-                type: 'GET',
-                url: '{% url 'user_profile:send-message' receiver.id %}',
-                data: {
-                    'message': $('#message_bar').val()
-                },
+            if ($('#message_bar').val() !== "" && $('#message_bar').val() !== null){
+                $.ajax({
+                    type: 'GET',
+                    url: '{% url 'user_profile:send-message' receiver.id %}',
+                    data: {
+                        'message': $('#message_bar').val()
+                    },
 
-                dataType: "json",
-                success: function () {
-                        $('#message_bar').val('');
-                        document.getElementById('delete_btn').style.display = 'block';
-                        updateMsg(0, false);
-                    }
-            })
+                    dataType: "json",
+                    success: function () {
+                            $('#message_bar').val('');
+                            document.getElementById('delete_btn').style.display = 'block';
+                            updateMsg(0, false);
+                        }
+                })
+            }
         }
         
         function updateMsg(len, repeat){
@@ -88,7 +90,7 @@
                 function (rows) {
                         let i;
                         let new_len = rows.length;
-                        if(new_len > len){
+                        if(new_len > len || new_len == 0){
                             $('#chatcontent').empty();
                             for (i = 0; i < rows.length; i++){
                                 let arow = rows[i];

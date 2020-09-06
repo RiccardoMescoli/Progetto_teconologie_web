@@ -249,13 +249,21 @@ def ajax_get_chat_messages(request):
 
 @profile_required
 def ajax_send_message(request, **kwargs):
+    message = request.GET['message']
+    if not isinstance(message, str):
+        return JsonResponse({})
+
+    message = message.lstrip().rstrip()
+    if message == "":
+        return JsonResponse({})
+
     try:
         receiver = UserProfile.objects.get(id=kwargs.get('pk', None))
     except UserProfile.DoesNotExist:
         return HttpResponseNotFound('<h1>Page not found</h1>')
 
     message = ChatMessage(
-        text=request.GET['message'],
+        text= message,
         sender=request.user.profile,
         receiver=receiver,
     )

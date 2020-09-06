@@ -76,10 +76,12 @@
 
                 {% else %}
         </article>
-            <article class="float-right mt-n4">
-            <button id="report_active_{{ review }}"
-                            onclick="report('{{ review.id }}')" class="btn btn-danger"><i class="far fa-flag"></i></button>
-            </article>
+                {% if not clear %}
+                    <article class="float-right mt-n4">
+                    <button id="report_active_{{ review }}"
+                                    onclick="report('{{ review.id }}')" class="btn btn-danger"><i class="far fa-flag"></i></button>
+                    </article>
+                {% endif %}
             {% endif %}
         {% endif %}
     </div>

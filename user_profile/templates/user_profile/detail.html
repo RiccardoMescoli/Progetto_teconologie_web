@@ -37,20 +37,26 @@
                         {% if user.is_authenticated %}
                             {% if user.id != object.user.id %}
                                 <div class="row justify-content-center mb-2">
-                                    {% if object in user.profile.followed_list %}
-                                        <button id="unfollow_btn" onclick="unfollow()" class="btn btn-outline-danger">
-                                            Unfollow
-                                        </button>
-                                        <button id="follow_btn" onclick="follow()" class="btn btn-outline-primary" style="display: none">
-                                            Follow
-                                        </button>
+                                    {% if user.has_profile %}
+                                        {% if object in user.profile.followed_list %}
+                                            <button id="unfollow_btn" onclick="unfollow()" class="btn btn-outline-danger">
+                                                Unfollow
+                                            </button>
+                                            <button id="follow_btn" onclick="follow()" class="btn btn-outline-primary" style="display: none">
+                                                Follow
+                                            </button>
+                                        {% else %}
+                                            <button id="unfollow_btn" onclick="unfollow()" class="btn btn-outline-danger" style="display: none">
+                                                Unfollow
+                                            </button>
+                                            <button id="follow_btn" onclick="follow()" class="btn btn-outline-primary">
+                                                Follow
+                                            </button>
+                                        {% endif %}
                                     {% else %}
-                                        <button id="unfollow_btn" onclick="unfollow()" class="btn btn-outline-danger" style="display: none">
-                                            Unfollow
-                                        </button>
-                                        <button id="follow_btn" onclick="follow()" class="btn btn-outline-primary">
+                                        <a class="btn btn-outline-primary" href="{% url "user_profile:user-profile-create" %}">
                                             Follow
-                                        </button>
+                                        </a>
                                     {% endif %}
                                     <a href="{% url 'user_profile:chat' object.id %}" class="btn btn-outline-primary ml-2">
                                         <i class="far fa-comment"></i>

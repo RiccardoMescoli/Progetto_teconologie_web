@@ -175,6 +175,17 @@ class BookReviewEditView(UpdateView):
     form_class = BookReviewEditForm
     template_name = 'book_functionalities/book_review/edit.html'
 
+    def form_valid(self, form):
+        profile = self.request.user.profile
+        try:
+            if BookReview.objects.get(user_profile=profile, book=form.cleaned_data.get('book', None)):
+                form.add_error('book', 'You have already reviewed this book')
+                return super(BookReviewEditView, self).form_invalid(form)
+        except BookReview.DoesNotExist:
+            pass
+
+        return super(BookReviewEditView, self).form_valid(form)
+
     def dispatch(self, request, *args, **kwargs):
         review = BookReview.objects.get(id=self.kwargs.get('pk'))
         if request.user.id != review.user_profile.user.id:
