@@ -178,7 +178,8 @@ class BookReviewEditView(UpdateView):
     def form_valid(self, form):
         profile = self.request.user.profile
         try:
-            if BookReview.objects.get(user_profile=profile, book=form.cleaned_data.get('book', None)):
+            other_review = BookReview.objects.get(user_profile=profile, book=form.cleaned_data.get('book', None))
+            if other_review.id != self.kwargs.get('pk', None):
                 form.add_error('book', 'You have already reviewed this book')
                 return super(BookReviewEditView, self).form_invalid(form)
         except BookReview.DoesNotExist:
