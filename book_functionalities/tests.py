@@ -195,33 +195,60 @@ class testTopList(TestCase):
         self.book_genre2 = BookGenre.objects.create(name="genre2")
         self.book_genre3 = BookGenre.objects.create(name="genre3")
 
-    def check_no_results(self, response):
-        self.assertEqual(response.status_code, 200)
+    def check_no_results(self, response, message=""):
+        self.assertEqual(response.status_code, 200, message)
 
-        self.assertQuerysetEqual(response.context['results_list'], [])
+        self.assertQuerysetEqual(response.context['results_list'], [], msg=message)
         self.assertContains(response, "No results found")
 
-    def test_no_results(self):
+    def test_no_results_with_no_books(self):
         # No results check with no books
         response = self.client.get(reverse("book_functionalities:book-top-list"))
         self.check_no_results(response)
 
+    def test_no_results_with_only_books_without_reviews(self):
         # No results check with only books without reviews
         book_without_reviews1 = create_book(self.author1, self.book_genre1)
         book_without_reviews2 = create_book(self.author2, self.book_genre2)
+        response = self.client.get(reverse("book_functionalities:book-top-list"))
 
         self.check_no_results(response)
+
+        book_without_reviews1.delete()
+        book_without_reviews2.delete()
+
+    def test_no_results_with_only_reviewed_books_of_the_wrong_genre(self):
         # No results check with reviewed books of the wrong genre
-        reviewed_book1 = book_without_reviews1
+        reviewed_book1 = create_book(self.author1, self.book_genre1)
         review1 = create_review(reviewed_book1, self.profile_user1, 8)
+        book_without_reviews2 = create_book(self.author2, self.book_genre2)
 
         response = self.client.get(reverse("book_functionalities:book-top-list"), {'genre': self.book_genre3.id})
         self.check_no_results(response)
+
+        reviewed_book1.delete()
+        review1.delete()
+        book_without_reviews2.delete()
+
+    def test_no_results_with_only_reviewed_books_having_the_wrong_author(self):
         # No results check with reviewed books having the wrong author
+        reviewed_book1 = create_book(self.author1, self.book_genre1)
+        review1 = create_review(reviewed_book1, self.profile_user1, 8)
+        book_without_reviews2 = create_book(self.author2, self.book_genre2)
+
         response = self.client.get(reverse("book_functionalities:book-top-list"), {'author': self.author3.full_name})
         self.check_no_results(response)
 
+        reviewed_book1.delete()
+        review1.delete()
+        book_without_reviews2.delete()
+
+    def test_no_results_with_only_books_having_wrong_author_and_wrong_genre(self):
         # No results check with reviewed books of the wrong genre and the wrong author
+        reviewed_book1 = create_book(self.author1, self.book_genre1)
+        review1 = create_review(reviewed_book1, self.profile_user1, 8)
+        book_without_reviews2 = create_book(self.author2, self.book_genre2)
+
         response = self.client.get(reverse("book_functionalities:book-top-list"), {
             'author': self.author3.full_name,
             'genre': self.book_genre3.id,
@@ -232,7 +259,7 @@ class testTopList(TestCase):
         book_without_reviews2.delete()
         review1.delete()
 
-    def test_no_results_incorrect_data(self):
+    def test_no_results_with_incorrect_data(self):
         book1 = create_book(self.author1, self.book_genre1)
         book2 = create_book(self.author1, self.book_genre2)
         book3 = create_book(self.author2, self.book_genre1)
@@ -253,88 +280,88 @@ class testTopList(TestCase):
         # No results check with non existent genre id
         response = self.client.get(reverse("book_functionalities:book-top-list"),
                                    {'genre': self.book_genre3.id+self.book_genre2.id+self.book_genre1.id})
-        self.check_no_results(response)
+        self.check_no_results(response, message="FAILURE in: No results with non existent genre id")
 
         # No results check with genre id of wrong type (not convertible to an existing id)
         response = self.client.get(reverse("book_functionalities:book-top-list"),
                                    {'genre': "a string"})
-        self.check_no_results(response)
+        self.check_no_results(response, message="FAILURE in: No results with genre id of the wrong type")
 
         response = self.client.get(reverse("book_functionalities:book-top-list"),
                                    {'genre': 1.5})
-        self.check_no_results(response)
+        self.check_no_results(response, message="FAILURE in: No results with genre id of the wrong type")
 
         response = self.client.get(reverse("book_functionalities:book-top-list"),
                                    {'genre': object()})
-        self.check_no_results(response)
+        self.check_no_results(response, message="FAILURE in: No results with genre id of the wrong type")
 
         # No results check with non existent author
         response = self.client.get(reverse("book_functionalities:book-top-list"),
                                    {'author': self.author1.full_name+"abcd"*5})
-        self.check_no_results(response)
+        self.check_no_results(response, message="FAILURE in: No results with non existent author")
 
         # No results check with author of wrong type (not convertible to an existing author name nor contained in one)
         response = self.client.get(reverse("book_functionalities:book-top-list"),
                                    {'author': 17})
-        self.check_no_results(response)
+        self.check_no_results(response, message="FAILURE in: No results with author of the wrong type")
 
         response = self.client.get(reverse("book_functionalities:book-top-list"),
                                    {'author': 1.5})
-        self.check_no_results(response)
+        self.check_no_results(response, message="FAILURE in: No results with author of the wrong type")
 
         response = self.client.get(reverse("book_functionalities:book-top-list"),
                                    {'author': object()})
-        self.check_no_results(response)
+        self.check_no_results(response, message="FAILURE in: No results with author of the wrong type")
 
         # No results check with mixed correct and wrong parameters
         response = self.client.get(reverse("book_functionalities:book-top-list"),
                                    {'author': 17, 'genre': self.book_genre1.id})
-        self.check_no_results(response)
+        self.check_no_results(response, message="FAILURE in: No results with mixed correct and incorrect parameters")
 
         response = self.client.get(reverse("book_functionalities:book-top-list"),
                                    {'author': 1.5, 'genre': self.book_genre1.id})
-        self.check_no_results(response)
+        self.check_no_results(response, message="FAILURE in: No results with mixed correct and incorrect parameters")
 
         response = self.client.get(reverse("book_functionalities:book-top-list"),
                                    {'author': object(), 'genre': self.book_genre1.id})
-        self.check_no_results(response)
+        self.check_no_results(response, message="FAILURE in: No results with mixed correct and incorrect parameters")
 
         response = self.client.get(reverse("book_functionalities:book-top-list"),
                                    {'author': self.author3.full_name, 'genre': self.book_genre1.id})
-        self.check_no_results(response)
+        self.check_no_results(response, message="FAILURE in: No results with mixed correct and incorrect parameters")
 
         response = self.client.get(reverse("book_functionalities:book-top-list"),
                                    {'genre': "a string", 'author': self.author1.full_name})
-        self.check_no_results(response)
+        self.check_no_results(response, message="FAILURE in: No results with mixed correct and incorrect parameters")
 
         response = self.client.get(reverse("book_functionalities:book-top-list"),
                                    {'genre': 1.5, 'author': self.author1.full_name})
-        self.check_no_results(response)
+        self.check_no_results(response, message="FAILURE in: No results with mixed correct and incorrect parameters")
 
         response = self.client.get(reverse("book_functionalities:book-top-list"),
                                    {'genre': self.book_genre3.id, 'author': self.author1.full_name})
-        self.check_no_results(response)
+        self.check_no_results(response, message="FAILURE in: No results with mixed correct and incorrect parameters")
 
         response = self.client.get(reverse("book_functionalities:book-top-list"),
                                    {'genre': object(), 'author': self.author1.full_name})
-        self.check_no_results(response)
+        self.check_no_results(response, message="FAILURE in: No results with mixed correct and incorrect parameters")
 
         # No results check with wrong parameters only
         response = self.client.get(reverse("book_functionalities:book-top-list"),
                                    {'author': 17, 'genre': "a string"})
-        self.check_no_results(response)
+        self.check_no_results(response, message="FAILURE in: No results with wrong parameters only")
 
         response = self.client.get(reverse("book_functionalities:book-top-list"),
                                    {'author': 1.5, 'genre': 1.5})
-        self.check_no_results(response)
+        self.check_no_results(response, message="FAILURE in: No results with wrong parameters only")
 
         response = self.client.get(reverse("book_functionalities:book-top-list"),
                                    {'author': object(), 'genre': object()})
-        self.check_no_results(response)
+        self.check_no_results(response, message="FAILURE in: No results with wrong parameters only")
 
         response = self.client.get(reverse("book_functionalities:book-top-list"),
                                    {'author': self.author3.full_name, 'genre': self.book_genre3.id})
-        self.check_no_results(response)
+        self.check_no_results(response, message="FAILURE in: No results with wrong parameters only")
 
         book1.delete()
         book2.delete()
@@ -379,48 +406,58 @@ class testTopList(TestCase):
         book6_review1 = create_review(book6, self.profile_user1, 8)
         book6_review2 = create_review(book6, self.profile_user2, 7)
 
+        message = ""
+
         # results with no filtering
         old_value = settings.MIN_AMOUNT_REVIEWS_TOPLIST
         settings.MIN_AMOUNT_REVIEWS_TOPLIST = 1
+
+        message = "FAILURE in: results with no filtering"
         response = self.client.get(reverse("book_functionalities:book-top-list"))
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200, message)
         self.assertNotContains(response, "No results found")
-        self.assertNotEqual(response.context['results_list'], [])
-        self.assertEqual(response.context['results_list'], [book1, book2, book3, book4, book5, book6])
+        self.assertNotEqual(response.context['results_list'], [], message)
+        self.assertEqual(response.context['results_list'], [book1, book2, book3, book4, book5, book6], message)
 
         # results with filters set on default values
         response = self.client.get(reverse("book_functionalities:book-top-list"),
                                    {"author": "", "genre": '0'}
                                    )
 
-        self.assertEqual(response.status_code, 200)
+        message = "FAILURE in: results with filters set on default values"
+        self.assertEqual(response.status_code, 200, message)
         self.assertNotContains(response, "No results found")
-        self.assertNotEqual(response.context['results_list'], [])
-        self.assertEqual(response.context['results_list'], [book1, book2, book3, book4, book5, book6])
+        self.assertNotEqual(response.context['results_list'], [], message)
+        self.assertEqual(response.context['results_list'], [book1, book2, book3, book4, book5, book6], message)
 
         # results with filtering on genre
         response = self.client.get(reverse("book_functionalities:book-top-list"), {'genre': self.book_genre1.id})
-        self.assertEqual(response.status_code, 200)
+
+        message = "FAILURE in: results with filtering on genre"
+        self.assertEqual(response.status_code, 200, message)
         self.assertNotContains(response, "No results found")
-        self.assertNotEqual(response.context['results_list'], [])
-        self.assertEqual(response.context['results_list'], [book1, book3, book5])
+        self.assertNotEqual(response.context['results_list'], [], message)
+        self.assertEqual(response.context['results_list'], [book1, book3, book5], message)
 
         # results with filtering on author
         response = self.client.get(reverse("book_functionalities:book-top-list"), {'author': self.author1.full_name})
-        self.assertEqual(response.status_code, 200)
+
+        message = "FAILURE in: results with filtering on author"
+        self.assertEqual(response.status_code, 200, message)
         self.assertNotContains(response, "No results found")
-        self.assertNotEqual(response.context['results_list'], [])
-        self.assertEqual(response.context['results_list'], [book1, book2, book5])
+        self.assertNotEqual(response.context['results_list'], [], message)
+        self.assertEqual(response.context['results_list'], [book1, book2, book5], message)
 
         # results with filtering on author and genre
         response = self.client.get(reverse("book_functionalities:book-top-list"),
                                    {'genre': self.book_genre1.id, 'author': self.author1.full_name},
                                    )
 
-        self.assertEqual(response.status_code, 200)
+        message = "FAILURE in: results with filtering on author and genre"
+        self.assertEqual(response.status_code, 200, message)
         self.assertNotContains(response, "No results found")
-        self.assertNotEqual(response.context['results_list'], [])
-        self.assertEqual(response.context['results_list'], [book1, book5])
+        self.assertNotEqual(response.context['results_list'], [], message)
+        self.assertEqual(response.context['results_list'], [book1, book5], message)
 
         # results with filtering on list length (the view should return 10 results at most)
         book7 = create_book(self.author1, self.book_genre1.id)
@@ -437,23 +474,27 @@ class testTopList(TestCase):
         book11_review = create_review(book11, self.profile_user1, 3)
         book12_review = create_review(book12, self.profile_user1, 2)
 
+        message = "FAILURE in: results with filtering on list length (10 results at most)"
         response = self.client.get(reverse("book_functionalities:book-top-list"))
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200,message)
         self.assertNotContains(response, "No results found")
-        self.assertNotEqual(response.context['results_list'], [])
+        self.assertNotEqual(response.context['results_list'], [], message)
         self.assertEqual(response.context['results_list'],
-                         [book1, book2, book3, book4, book5, book6, book7, book8, book9, book10]
+                         [book1, book2, book3, book4, book5, book6, book7, book8, book9, book10],
+                         message
                          )
 
         # results with minimum amount of reviews to be included in the evaluation > 1
         settings.MIN_AMOUNT_REVIEWS_TOPLIST = 2
 
+        message = "FAILURE in: results with filtering on minimum amount of reviews to be included in the evaluation"
         response = self.client.get(reverse("book_functionalities:book-top-list"))
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200, message)
         self.assertNotContains(response, "No results found")
-        self.assertNotEqual(response.context['results_list'], [])
+        self.assertNotEqual(response.context['results_list'], [], message)
         self.assertEqual(response.context['results_list'],
-                         [book1, book2, book3, book4, book5, book6]
+                         [book1, book2, book3, book4, book5, book6],
+                         message
                          )
 
         settings.MIN_AMOUNT_REVIEWS_TOPLIST = old_value
